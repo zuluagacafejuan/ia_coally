@@ -1,5 +1,6 @@
 import nltk
 nltk.download('stopwords')
+nltk.download('punkt')
 from fastapi import FastAPI
 import requests
 from pymongo import MongoClient
