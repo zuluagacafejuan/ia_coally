@@ -1,3 +1,5 @@
+import nltk
+nltk.download('stopwords')
 from fastapi import FastAPI
 import requests
 from pymongo import MongoClient
@@ -17,6 +19,7 @@ import numpy as np
 import joblib
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+
 
 
 class CreateCVRequestModel(BaseModel):
