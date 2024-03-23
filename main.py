@@ -615,19 +615,19 @@ app.add_middleware(
 async def test():
  return "Hello World!"
 
-@app.post("/create_cv/")
+@app.post("/api/create_cv")
 def create_cv(request: CreateCVRequestModel):
   id_cv = request.id_cv
 
   agregar_cv(id_cv)
 
-@app.post("/create_project/")
+@app.post("/api/create_project")
 def create_project(request: CreateProjectRequestModel):
   id_project = request.id_project
 
   agregar_proyecto(id_project)
 
-@app.post("/add_applicant/")
+@app.post("/api/add_applicant")
 def add_applicant(request: AddApplicantRequestModel):
   id_project = request.id_project
   id_cv = request.id_cv
