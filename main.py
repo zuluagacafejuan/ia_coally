@@ -345,10 +345,10 @@ def descargar_data_cv(id_cv):
   client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
 
   db = client['CoallyProd']
-  db_proyectos = db['projects']
-  db_usuarios = db['users']
   db_cvs = db['usercvs']
   data_cv = db_cvs.find_one({'_id':ObjectId(id_cv)})
+
+  print('Data cv  ' + str(data_cv))
   lista_columnas = ["_id","educacion", "aptitudes_principales","experiencia", "extracto"]
   temp_dict = {}
   for elemento in lista_columnas:
@@ -512,6 +512,8 @@ def calcular_porcentaje_similitud(features):
   modelo.predict_proba(features)
 
 def agregar_cv(id_cv):
+
+  print('El id de la cv es  '+ str(id_cv))
 
   data_cv = descargar_data_cv(id_cv)
   data_cv_transformada = transformar_data_cv(data_cv)
