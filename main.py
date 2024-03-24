@@ -1,4 +1,5 @@
 import nltk
+from time import time
 nltk.download('stopwords')
 nltk.download('punkt')
 from fastapi import FastAPI
@@ -115,7 +116,7 @@ def conectar_base_datos():
         print("Error al conectar a la base de datos:", error)
         return None
 
-from time import time
+
 def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job):
     try:
         cursor.execute(f"""INSERT INTO public.general_compatibility(id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
@@ -348,7 +349,10 @@ def descargar_data_cv(id_cv):
   db_cvs = db['usercvs']
   data_cv = db_cvs.find_one({'_id':ObjectId(id_cv)})
 
-  print('Data cv  ' + str(data_cv))
+  if not data_cv:
+    time.sleep(2)
+    data_cv = db_cvs.find_one({'_id':ObjectId(id_cv)})
+
   lista_columnas = ["_id","educacion", "aptitudes_principales","experiencia", "extracto"]
   temp_dict = {}
   for elemento in lista_columnas:
@@ -365,9 +369,12 @@ def descargar_data_proyecto(id_proyecto):
 
   db = client['CoallyProd']
   db_proyectos = db['projects']
-  db_usuarios = db['users']
-  db_cvs = db['usercvs']
   data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
+
+  if not data_proyecto:
+    time.sleep(2)
+    data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
+    
   lista_columnas = ["_id","NombreOportunidad", "DescribeProyecto", "municipio", "responsabilidadYfunciones", "country","habilidadesTecnicas","Niveldeconocimiento","experienciaAnos","habilidadesBlandas","empleos_alternativos","SeleccionaCarrera","departamento"]
   temp_dict = {}
   for elemento in lista_columnas:
