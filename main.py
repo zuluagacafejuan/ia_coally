@@ -1,5 +1,5 @@
 import nltk
-from time import time
+import time
 nltk.download('stopwords')
 nltk.download('punkt')
 from fastapi import FastAPI
@@ -374,7 +374,7 @@ def descargar_data_proyecto(id_proyecto):
   if not data_proyecto:
     time.sleep(2)
     data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
-    
+
   lista_columnas = ["_id","NombreOportunidad", "DescribeProyecto", "municipio", "responsabilidadYfunciones", "country","habilidadesTecnicas","Niveldeconocimiento","experienciaAnos","habilidadesBlandas","empleos_alternativos","SeleccionaCarrera","departamento"]
   temp_dict = {}
   for elemento in lista_columnas:
