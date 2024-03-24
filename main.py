@@ -342,6 +342,12 @@ def extraer_hard_skills(texto):
   return list(set(lista_hard_skills))
 
 def descargar_data_cv(id_cv):
+  client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
+
+  db = client['CoallyProd']
+  db_proyectos = db['projects']
+  db_usuarios = db['users']
+  db_cvs = db['usercvs']
   data_cv = db_cvs.find_one({'_id':ObjectId(id_cv)})
   lista_columnas = ["_id","educacion", "aptitudes_principales","experiencia", "extracto"]
   temp_dict = {}
@@ -355,6 +361,12 @@ def descargar_data_cv(id_cv):
   return temp_dict
 
 def descargar_data_proyecto(id_proyecto):
+  client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
+
+  db = client['CoallyProd']
+  db_proyectos = db['projects']
+  db_usuarios = db['users']
+  db_cvs = db['usercvs']
   data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
   lista_columnas = ["_id","NombreOportunidad", "DescribeProyecto", "municipio", "responsabilidadYfunciones", "country","habilidadesTecnicas","Niveldeconocimiento","experienciaAnos","habilidadesBlandas","empleos_alternativos","SeleccionaCarrera","departamento"]
   temp_dict = {}
