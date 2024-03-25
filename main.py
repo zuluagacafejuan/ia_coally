@@ -348,9 +348,9 @@ def descargar_data_cv(id_cv):
   db_cvs = db['usercvs']
   data_cv = db_cvs.find_one({'_id':ObjectId(id_cv)})
 
+  print('---'+id_cv+'---')
+
   if not data_cv:
-    time.sleep(10)
-    print('Espero 10 segundos')
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
     db = client['CoallyProd']
     db_cvs = db['usercvs']
