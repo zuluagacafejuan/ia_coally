@@ -349,8 +349,8 @@ def descargar_data_cv(id_cv):
   data_cv = db_cvs.find_one({'_id':ObjectId(id_cv)})
 
   if not data_cv:
-    print('No encontré data_cv')
-    time.sleep(2)
+    time.sleep(10)
+    print('Espero 10 segundos')
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
     db = client['CoallyProd']
     db_cvs = db['usercvs']
@@ -375,7 +375,8 @@ def descargar_data_proyecto(id_proyecto):
   data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
 
   if not data_proyecto:
-    time.sleep(2)
+    time.sleep(10)
+    print('Espero 10 segundos')
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
     db = client['CoallyProd']
     db_proyectos = db['projects'] 
