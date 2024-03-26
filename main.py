@@ -343,15 +343,14 @@ def extraer_hard_skills(texto):
   return list(set(lista_hard_skills))
 
 def descargar_data_cv(id_cv):
-  print('esperando 60 segundos')
-  time.sleep(60)
+
+  for i in range(60):
+    print(i)
+    time.sleep(1)
   client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
   db = client['CoallyProd']
   db_cvs = db['usercvs']
   data_cv = db_cvs.find_one({'_id':ObjectId(str(id_cv))})
-
-  if not data_cv:
-    return 500
 
   lista_columnas = ["_id","educacion", "aptitudes_principales","experiencia", "extracto"]
   temp_dict = {}
