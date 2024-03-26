@@ -367,14 +367,6 @@ def descargar_data_proyecto(id_proyecto):
   db_proyectos = db['projects']
   data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
 
-  if not data_proyecto:
-    time.sleep(10)
-    print('Espero 10 segundos')
-    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
-    db = client['CoallyProd']
-    db_proyectos = db['projects'] 
-    data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
-
   lista_columnas = ["_id","NombreOportunidad", "DescribeProyecto", "municipio", "responsabilidadYfunciones", "country","habilidadesTecnicas","Niveldeconocimiento","experienciaAnos","habilidadesBlandas","empleos_alternativos","SeleccionaCarrera","departamento"]
   temp_dict = {}
   for elemento in lista_columnas:
@@ -520,9 +512,6 @@ def calcular_porcentaje_similitud(features):
 
 def agregar_cv(id_cv):
   
-
-  print('El id de la cv es  '+ str(id_cv))
-
   data_cv = descargar_data_cv(id_cv)
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
@@ -576,7 +565,6 @@ def agregar_proyecto(id_proyecto):
   mejores_cvs_similitud = obtener_mejores_cvs_similitud(cluster, [vector])
 
   ids = mejores_cvs_similitud.keys()
-  print(ids)
   lista_features = obtener_features_cv(ids)
   connection = conectar_base_datos()
   cursor = connection.cursor()
