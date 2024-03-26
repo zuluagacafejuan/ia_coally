@@ -344,8 +344,6 @@ def extraer_hard_skills(texto):
 
 def descargar_data_cv(id_cv):
 
-  time.sleep(60)
-
   client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
   db = client['CoallyProd']
   db_cvs = db['usercvs']
