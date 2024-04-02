@@ -599,7 +599,7 @@ def agregar_aplicante(id_proyecto, id_cv):
     relacion_experiencia = 0
   else:
     relacion_experiencia = features_cv['experiencia']/features_proyecto['experiencia']
-  features_finales = [relacion_experiencia]+list(calcular_features(features_cv, features_proyecto)) + [0]
+  features_finales = [relacion_experiencia]+list(features) + [0]
 
   X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
   X_scaled = scaler.transform(X)
