@@ -610,7 +610,7 @@ def agregar_aplicante(id_job, id_cv):
 
   similitud = cosine_similarity(cv_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1), oportunidad_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
 
-  compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud[0][0]/0.6, 1)
+  compatibilidad = max(modelo.predict_proba(X_scaled)[0]*min(similitud[0][0]/0.6, 1),0)
 
   connection = conectar_base_datos()
   cursor = connection.cursor()
