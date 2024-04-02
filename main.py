@@ -228,6 +228,7 @@ def obtener_features_cv(ids_cvs):
   ids_cvs = [f"'{id}'" for id in ids_cvs]
   ids_parametro = ', '.join(ids_cvs)
   query = f"SELECT * FROM public.features_cv WHERE id in ({ids_parametro})".format(ids_parametro)
+  print(query)
   cursor.execute(query)
   columnas = [desc[0] for desc in cursor.description]
   resultados = []
