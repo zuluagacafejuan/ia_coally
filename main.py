@@ -590,9 +590,9 @@ def agregar_proyecto(id_proyecto):
     actualizar_compatibilidad(connection, cursor, compatibilidad, id, id_proyecto)
   return 200
 
-def agregar_aplicante(id_proyecto, id_cv):
+def agregar_aplicante(id_job, id_cv):
   features_cv = obtener_features_cv([id_cv])[0]
-  features_proyecto = obtener_features_proyectos([id_proyecto])[0]
+  features_proyecto = obtener_features_proyectos([id_job])[0]
 
   features = calcular_features(features_cv, features_proyecto)
 
@@ -605,7 +605,14 @@ def agregar_aplicante(id_proyecto, id_cv):
   X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
   X_scaled = scaler.transform(X)
   compatibilidad = modelo.predict_proba(X_scaled)[0]
-  actualizar_compatibilidad(compatibilidad, id_cv, id_proyecto)
+
+  connection = conectar_base_datos()
+  cursor = connection.cursor()
+
+  if connection is None:
+      return None
+  
+  actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job)
   return 200
 
 
