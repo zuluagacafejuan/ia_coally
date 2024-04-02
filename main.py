@@ -585,7 +585,7 @@ def agregar_proyecto(id_proyecto):
 
     X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
     X_scaled = scaler.transform(X)
-    compatibilidad = modelo.predict_proba(X_scaled)[0]
+    compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
 
     actualizar_compatibilidad(connection, cursor, compatibilidad, id, id_proyecto)
   return 200
@@ -604,7 +604,12 @@ def agregar_aplicante(id_job, id_cv):
 
   X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
   X_scaled = scaler.transform(X)
-  compatibilidad = modelo.predict_proba(X_scaled)[0]
+
+  cv_df = pd.DataFrame({k:[v] for k,v in features_cv.items()})
+  oportunidad_df = pd.DataFrame({k:[v] for k,v in features_proyecto.items()})
+
+  similitud = cosine_similarity(cv_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1), oportunidad_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
+  compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
 
   connection = conectar_base_datos()
   cursor = connection.cursor()
