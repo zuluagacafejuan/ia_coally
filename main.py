@@ -593,6 +593,9 @@ def agregar_proyecto(id_proyecto):
 def agregar_aplicante(id_proyecto, id_cv):
   features_cv = obtener_features_cv(id_cv)
   features_proyecto = obtener_features_proyectos(id_proyecto)
+
+  print(features_cv)
+  print(features_proyecto)
   features = calcular_features(features_cv, features_proyecto)
 
   if( features_proyecto['experiencia'] == 0) or features_cv['experiencia'] ==0:
