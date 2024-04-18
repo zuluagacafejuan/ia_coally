@@ -563,6 +563,7 @@ def agregar_cv(id_cv, uniandes):
   return 200
 
 def agregar_proyecto(id_proyecto, uniandes):
+  print('Uniandes '+ str(uniandes))
   data_proyecto = descargar_data_proyecto(id_proyecto, uniandes)
   data_proyecto_transformada = transformar_data_proyecto(data_proyecto)
   features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
