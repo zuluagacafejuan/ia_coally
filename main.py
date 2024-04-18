@@ -519,7 +519,7 @@ def calcular_features(features_cv, features_proyecto):
 def calcular_porcentaje_similitud(features):
   modelo.predict_proba(features)
 
-def agregar_cv(id_cv):
+def agregar_cv(id_cv, uniandes):
   
   data_cv = descargar_data_cv(id_cv, uniandes)
   data_cv_transformada = transformar_data_cv(data_cv)
@@ -562,7 +562,7 @@ def agregar_cv(id_cv):
   cursor.close()
   return 200
 
-def agregar_proyecto(id_proyecto):
+def agregar_proyecto(id_proyecto, uniandes):
   data_proyecto = descargar_data_proyecto(id_proyecto, uniandes)
   data_proyecto_transformada = transformar_data_proyecto(data_proyecto)
   features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
