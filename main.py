@@ -348,9 +348,11 @@ def extraer_hard_skills(texto):
 def descargar_data_cv(id_cv, uniandes):
   if uniandes:
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster") 
+    db = client['development']
   else:
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
-  db = client['CoallyProd']
+    db = client['CoallyProd']
+
   db_cvs = db['usercvs']
   data_cv = db_cvs.find_one({'_id':ObjectId(str(id_cv))})
 
@@ -369,10 +371,11 @@ def descargar_data_proyecto(id_proyecto, uniandes):
 
   if uniandes:
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster")
+    db = client['development']
   else:
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
-
-  db = client['CoallyProd']
+    db = client['CoallyProd']
+  
   db_proyectos = db['projects']
   data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
 
@@ -563,7 +566,6 @@ def agregar_cv(id_cv, uniandes):
   return 200
 
 def agregar_proyecto(id_proyecto, uniandes):
-  print('Uniandes '+ str(uniandes))
   data_proyecto = descargar_data_proyecto(id_proyecto, uniandes)
   data_proyecto_transformada = transformar_data_proyecto(data_proyecto)
   features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
