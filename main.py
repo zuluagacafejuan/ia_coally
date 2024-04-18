@@ -27,11 +27,11 @@ from typing import Union
 
 class CreateCVRequestModel(BaseModel):
   id_cv: str
-  uniandes: Union[bool, None] = False
+  uniandes: Union[bool, None] = None
 
 class CreateProjectRequestModel(BaseModel):
   id_project: str
-  uniandes: Union[bool, None] = False
+  uniandes: Union[bool, None] = None
 
 class AddApplicantRequestModel(BaseModel):
   id_cv: str
