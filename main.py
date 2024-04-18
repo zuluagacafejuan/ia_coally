@@ -21,14 +21,17 @@ import numpy as np
 import joblib
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Union
 
 
 
 class CreateCVRequestModel(BaseModel):
   id_cv: str
+  uniandes: Union[bool, None] = False
 
 class CreateProjectRequestModel(BaseModel):
   id_project: str
+  uniandes: Union[bool, None] = False
 
 class AddApplicantRequestModel(BaseModel):
   id_cv: str
@@ -342,9 +345,11 @@ def extraer_hard_skills(texto):
 
   return list(set(lista_hard_skills))
 
-def descargar_data_cv(id_cv):
-
-  client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
+def descargar_data_cv(id_cv, uniandes):
+  if uniandes:
+    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster") 
+  else:
+    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
   db = client['CoallyProd']
   db_cvs = db['usercvs']
   data_cv = db_cvs.find_one({'_id':ObjectId(str(id_cv))})
@@ -360,8 +365,12 @@ def descargar_data_cv(id_cv):
       temp_dict[elemento] = 0
   return temp_dict
 
-def descargar_data_proyecto(id_proyecto):
-  client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
+def descargar_data_proyecto(id_proyecto, uniandes):
+
+  if uniandes:
+    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster")
+  else:
+    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
 
   db = client['CoallyProd']
   db_proyectos = db['projects']
@@ -512,7 +521,7 @@ def calcular_porcentaje_similitud(features):
 
 def agregar_cv(id_cv):
   
-  data_cv = descargar_data_cv(id_cv)
+  data_cv = descargar_data_cv(id_cv, uniandes)
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
   cluster, vector = clusterizar((data_cv_transformada['aptitudes_principales']+' '+data_cv_transformada['extracto']+' '+data_cv_transformada['Titulos']).replace('~',','))
@@ -554,7 +563,7 @@ def agregar_cv(id_cv):
   return 200
 
 def agregar_proyecto(id_proyecto):
-  data_proyecto = descargar_data_proyecto(id_proyecto)
+  data_proyecto = descargar_data_proyecto(id_proyecto, uniandes)
   data_proyecto_transformada = transformar_data_proyecto(data_proyecto)
   features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
   cluster, vector = clusterizar((data_proyecto_transformada['NombreOportunidad']+' '+data_proyecto_transformada['DescribeProyecto']+' '+data_proyecto_transformada['responsabilidadYfunciones']+' '+data_proyecto_transformada['habilidadesTecnicas']+' '+data_proyecto_transformada['habilidadesBlandas']+' '+data_proyecto_transformada['empleos_alternativos']+' '+data_proyecto_transformada['SeleccionaCarrera']).replace('~',','))
@@ -643,14 +652,16 @@ async def test():
 @app.post("/api/create_cv")
 def create_cv(request: CreateCVRequestModel):
   id_cv = request.id_cv
+  uniandes = request.uniandes
 
-  agregar_cv(id_cv)
+  agregar_cv(id_cv, uniandes)
 
 @app.post("/api/create_project")
 def create_project(request: CreateProjectRequestModel):
   id_project = request.id_project
+  uniandes = request.uniandes
 
-  agregar_proyecto(id_project)
+  agregar_proyecto(id_project, uniandes)
 
 @app.post("/api/add_applicant")
 def add_applicant(request: AddApplicantRequestModel):
