@@ -570,7 +570,8 @@ def agregar_cv(id_cv, uniandes=False):
   mejores_oportunidades_similitud = obtener_mejores_oportunidades_similitud(cluster, [vector], uniandes)
   ids = mejores_oportunidades_similitud.keys()
   lista_features = obtener_features_proyectos(ids, uniandes)
-  
+  print(uniandes)
+  print(mejores_oportunidades_similitud)
   connection = conectar_base_datos()
   cursor = connection.cursor()
   if connection is None:
@@ -608,8 +609,6 @@ def agregar_proyecto(id_proyecto, uniandes=False):
     features_proyecto['x'+str(index+1)] = item
   insertar_features_proyectos(features_proyecto, uniandes)
   mejores_cvs_similitud = obtener_mejores_cvs_similitud(cluster, [vector], uniandes)
-  print(uniandes)
-  print(mejores_cvs_similitud)
   ids = mejores_cvs_similitud.keys()
   lista_features = obtener_features_cv(ids, uniandes)
   connection = conectar_base_datos()
