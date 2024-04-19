@@ -556,7 +556,8 @@ def calcular_porcentaje_similitud(features):
   modelo.predict_proba(features)
 
 def agregar_cv(id_cv, uniandes=False):
-  
+  print('REVISANDO AGREGAR CV')
+  print(uniandes)
   data_cv = descargar_data_cv(id_cv, uniandes)
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
