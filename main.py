@@ -691,14 +691,20 @@ def create_cv(request: CreateCVRequestModel):
   id_cv = request.id_cv
   uniandes = request.uniandes
 
-  agregar_cv(id_cv, uniandes)
+  try:
+    agregar_cv(id_cv, uniandes)
+  except:
+    agregar_cv(id_cv, not uniandes)
 
 @app.post("/api/create_project")
 def create_project(request: CreateProjectRequestModel):
   id_project = request.id_project
   uniandes = request.uniandes
 
-  agregar_proyecto(id_project, uniandes)
+  try:
+    agregar_proyecto(id_project, uniandes)
+  except:
+    agregar_proyecto(id_project, not uniandes)
 
 @app.post("/api/add_applicant")
 def add_applicant(request: AddApplicantRequestModel):
