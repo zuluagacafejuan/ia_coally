@@ -123,6 +123,8 @@ def conectar_base_datos():
 
 def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job, uniandes):
     try:
+        print('actualizar')
+        print(uniandes)
         if not uniandes:
           cursor.execute(f"""INSERT INTO public.general_compatibility (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
           connection.commit()
