@@ -36,6 +36,7 @@ class CreateProjectRequestModel(BaseModel):
 class AddApplicantRequestModel(BaseModel):
   id_cv: str
   id_project: str
+  uniandes: Union[bool, None] = None
 
 nltk.download('wordnet')
 
@@ -120,10 +121,14 @@ def conectar_base_datos():
         return None
 
 
-def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job):
+def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job, uniandes):
     try:
-        cursor.execute(f"""INSERT INTO public.general_compatibility(id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
-        connection.commit()
+        if not uniandes:
+          cursor.execute(f"""INSERT INTO public.general_compatibility (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
+          connection.commit()
+        else:
+          cursor.execute(f"""INSERT INTO public.general_compatibility_uniandes (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
+          connection.commit()
 
         return "Actualización exitosa"
     except psycopg2.Error as error:
@@ -137,7 +142,7 @@ def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job)
 #################################### INSERTAR FEATURES CV ######################################
 ################################################################################################
 
-def insertar_features_cv(features_cv):
+def insertar_features_cv(features_cv, uniandes=False):
 
   features_cv['cluster'] = int(features_cv['cluster'])
   features_cv['experiencia'] = int(features_cv['experiencia'])
@@ -147,7 +152,11 @@ def insertar_features_cv(features_cv):
 
   columns = ', '.join(features_cv.keys())
   placeholders = ', '.join(['%s'] * len(features_cv))
-  query = f"INSERT INTO public.features_cv ({columns}) VALUES ({placeholders})"
+  
+  if not uniandes:
+    query = f"INSERT INTO public.features_cv ({columns}) VALUES ({placeholders})"
+  else:
+    query = f"INSERT INTO public.features_cv_uniandes ({columns}) VALUES ({placeholders})"
 
   values = list(features_cv.values())
 
@@ -161,7 +170,7 @@ def insertar_features_cv(features_cv):
 ################################################################################################
 
 
-def insertar_features_proyectos(features_proyectos):
+def insertar_features_proyectos(features_proyectos, uniandes=False):
 
   features_proyectos['cluster'] = int(features_proyectos['cluster'])
   features_proyectos['experiencia'] = int(features_proyectos['experiencia'])
@@ -170,7 +179,11 @@ def insertar_features_proyectos(features_proyectos):
 
   columns = ', '.join(features_proyectos.keys())
   placeholders = ', '.join(['%s'] * len(features_proyectos))
-  query = f"INSERT INTO public.features_projects ({columns}) VALUES ({placeholders})"
+
+  if not uniandes:
+    query = f"INSERT INTO public.features_projects ({columns}) VALUES ({placeholders})"
+  else:
+    query = f"INSERT INTO public.features_projects_uniandes ({columns}) VALUES ({placeholders})"
 
   values = list(features_proyectos.values())
 
@@ -183,11 +196,15 @@ def insertar_features_proyectos(features_proyectos):
 ##################################### OBTENER VECTORES CV ######################################
 ################################################################################################
 
-def obtener_vectores_cvs(cluster):
+def obtener_vectores_cvs(cluster, uniandes=False):
   connection = conectar_base_datos()
   cursor = connection.cursor()
 
-  query = f"SELECT * FROM public.features_cv WHERE cluster = {cluster}".format(cluster)
+  if not uniandes:
+    query = f"SELECT * FROM public.features_cv WHERE cluster = {cluster}".format(cluster)
+  else:
+    query = f"SELECT * FROM public.features_cv_uniandes WHERE cluster = {cluster}".format(cluster)
+
   cursor.execute(query)
   resultados = cursor.fetchall()
   cursor.close()
@@ -202,11 +219,15 @@ def obtener_vectores_cvs(cluster):
 ################################################################################################
 
 
-def obtener_vectores_oportunidades(cluster):
+def obtener_vectores_oportunidades(cluster, uniandes=False):
   connection = conectar_base_datos()
   cursor = connection.cursor()
 
-  query = f"SELECT * FROM public.features_projects WHERE cluster = {cluster}".format(cluster)
+  if not uniandes:
+    query = f"SELECT * FROM public.features_projects WHERE cluster = {cluster}".format(cluster)
+  else:
+    query = f"SELECT * FROM public.features_projects_uniandes WHERE cluster = {cluster}".format(cluster)
+
   cursor.execute(query)
   resultados = cursor.fetchall()
   cursor.close()
@@ -221,7 +242,7 @@ def obtener_vectores_oportunidades(cluster):
 ################################################################################################
 
 
-def obtener_features_cv(ids_cvs):
+def obtener_features_cv(ids_cvs, uniandes):
   if len(ids_cvs) == 0:
     return []
 
@@ -230,7 +251,12 @@ def obtener_features_cv(ids_cvs):
 
   ids_cvs = [f"'{id}'" for id in ids_cvs]
   ids_parametro = ', '.join(ids_cvs)
-  query = f"SELECT * FROM public.features_cv WHERE id in ({ids_parametro})".format(ids_parametro)
+
+  if not uniandes:
+    query = f"SELECT * FROM public.features_cv WHERE id in ({ids_parametro})".format(ids_parametro)
+  else:
+    query = f"SELECT * FROM public.features_cv_uniandes WHERE id in ({ids_parametro})".format(ids_parametro)
+
   cursor.execute(query)
   columnas = [desc[0] for desc in cursor.description]
   resultados = []
@@ -246,7 +272,7 @@ def obtener_features_cv(ids_cvs):
 ################################## OBTENER VECTORES PROYECTOS ##################################
 ################################################################################################
 
-def obtener_features_proyectos(ids_proyectos):
+def obtener_features_proyectos(ids_proyectos, uniandes):
 
   if len(ids_proyectos) == 0:
     return []
@@ -254,7 +280,12 @@ def obtener_features_proyectos(ids_proyectos):
   cursor = connection.cursor()
   ids_proyectos = [f"'{id}'" for id in ids_proyectos]
   ids_parametro = ', '.join(ids_proyectos)
-  query = f"SELECT * FROM public.features_projects WHERE id in ({ids_parametro})".format(ids_parametro)
+
+  if not uniandes:
+    query = f"SELECT * FROM public.features_projects WHERE id in ({ids_parametro})".format(ids_parametro)
+  else:
+    query = f"SELECT * FROM public.features_projects_uniandes WHERE id in ({ids_parametro})".format(ids_parametro)
+
   cursor.execute(query)
   columnas = [desc[0] for desc in cursor.description]
   resultados = []
@@ -345,7 +376,7 @@ def extraer_hard_skills(texto):
 
   return list(set(lista_hard_skills))
 
-def descargar_data_cv(id_cv, uniandes):
+def descargar_data_cv(id_cv, uniandes =False):
   if uniandes:
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster") 
     db = client['development']
@@ -367,7 +398,7 @@ def descargar_data_cv(id_cv, uniandes):
       temp_dict[elemento] = 0
   return temp_dict
 
-def descargar_data_proyecto(id_proyecto, uniandes):
+def descargar_data_proyecto(id_proyecto, uniandes=False):
 
   if uniandes:
     client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster")
@@ -467,16 +498,16 @@ def clusterizar(descripcion):
   cluster = pipeline.predict(descripcion)[0]
   return cluster, vector[0]
 
-def obtener_mejores_oportunidades_similitud(cluster, vector_cv):
-  vectores_oportunidades_cluster = obtener_vectores_oportunidades(cluster)
+def obtener_mejores_oportunidades_similitud(cluster, vector_cv, uniandes=False):
+  vectores_oportunidades_cluster = obtener_vectores_oportunidades(cluster, uniandes)
   if len(vectores_oportunidades_cluster) == 0:
     return {}
   similitud_cos = cosine_similarity(vector_cv, vectores_oportunidades_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
   indices = np.where(similitud_cos[0] > 0.2)[0]
   return dict(zip(vectores_oportunidades_cluster.iloc[indices]['id'], similitud_cos[0][indices]))
 
-def obtener_mejores_cvs_similitud(cluster, vector_oportunidad):
-  vectores_cvs_cluster = obtener_vectores_cvs(cluster)
+def obtener_mejores_cvs_similitud(cluster, vector_oportunidad, uniandes=False):
+  vectores_cvs_cluster = obtener_vectores_cvs(cluster, uniandes)
   if len(vectores_cvs_cluster) == 0:
     return {}
   similitud_cos = cosine_similarity(vector_oportunidad, vectores_cvs_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
@@ -522,7 +553,7 @@ def calcular_features(features_cv, features_proyecto):
 def calcular_porcentaje_similitud(features):
   modelo.predict_proba(features)
 
-def agregar_cv(id_cv, uniandes):
+def agregar_cv(id_cv, uniandes=False):
   
   data_cv = descargar_data_cv(id_cv, uniandes)
   data_cv_transformada = transformar_data_cv(data_cv)
@@ -533,10 +564,10 @@ def agregar_cv(id_cv, uniandes):
   for index, item in enumerate(vector):
     features_cv['x'+str(index+1)] = item
 
-  insertar_features_cv(features_cv)
-  mejores_oportunidades_similitud = obtener_mejores_oportunidades_similitud(cluster, [vector])
+  insertar_features_cv(features_cv, uniandes)
+  mejores_oportunidades_similitud = obtener_mejores_oportunidades_similitud(cluster, [vector], uniandes)
   ids = mejores_oportunidades_similitud.keys()
-  lista_features = obtener_features_proyectos(ids)
+  lista_features = obtener_features_proyectos(ids, uniandes)
   
   connection = conectar_base_datos()
   cursor = connection.cursor()
@@ -559,13 +590,13 @@ def agregar_cv(id_cv, uniandes):
     X_scaled = scaler.transform(X)
     compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
 
-    actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id)
+    actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id, uniandes)
    
   connection.close()
   cursor.close()
   return 200
 
-def agregar_proyecto(id_proyecto, uniandes):
+def agregar_proyecto(id_proyecto, uniandes=False):
   data_proyecto = descargar_data_proyecto(id_proyecto, uniandes)
   data_proyecto_transformada = transformar_data_proyecto(data_proyecto)
   features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
@@ -573,11 +604,11 @@ def agregar_proyecto(id_proyecto, uniandes):
   features_proyecto['cluster'] = cluster
   for index, item in enumerate(vector):
     features_proyecto['x'+str(index+1)] = item
-  insertar_features_proyectos(features_proyecto)
-  mejores_cvs_similitud = obtener_mejores_cvs_similitud(cluster, [vector])
+  insertar_features_proyectos(features_proyecto, uniandes)
+  mejores_cvs_similitud = obtener_mejores_cvs_similitud(cluster, [vector], uniandes)
 
   ids = mejores_cvs_similitud.keys()
-  lista_features = obtener_features_cv(ids)
+  lista_features = obtener_features_cv(ids, uniandes)
   connection = conectar_base_datos()
   cursor = connection.cursor()
 
@@ -599,12 +630,12 @@ def agregar_proyecto(id_proyecto, uniandes):
     X_scaled = scaler.transform(X)
     compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
 
-    actualizar_compatibilidad(connection, cursor, compatibilidad, id, id_proyecto)
+    actualizar_compatibilidad(connection, cursor, compatibilidad, id, id_proyecto, uniandes)
   return 200
 
-def agregar_aplicante(id_job, id_cv):
-  features_cv = obtener_features_cv([id_cv])[0]
-  features_proyecto = obtener_features_proyectos([id_job])[0]
+def agregar_aplicante(id_job, id_cv, uniandes = False):
+  features_cv = obtener_features_cv([id_cv], uniandes)[0]
+  features_proyecto = obtener_features_proyectos([id_job], uniandes)[0]
 
   features = calcular_features(features_cv, features_proyecto)
 
@@ -630,7 +661,7 @@ def agregar_aplicante(id_job, id_cv):
   if connection is None:
       return None
   
-  actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job)
+  actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job, uniandes)
   return 200
 
 
@@ -670,5 +701,6 @@ def create_project(request: CreateProjectRequestModel):
 def add_applicant(request: AddApplicantRequestModel):
   id_project = request.id_project
   id_cv = request.id_cv
+  uniandes = request.uniandes
 
-  agregar_aplicante(id_project, id_cv)
+  agregar_aplicante(id_project, id_cv, uniandes)
