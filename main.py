@@ -123,8 +123,6 @@ def conectar_base_datos():
 
 def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job, uniandes):
     try:
-        print('actualizar')
-        print(uniandes)
         if not uniandes:
           cursor.execute(f"""INSERT INTO public.general_compatibility (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
           connection.commit()
@@ -221,9 +219,9 @@ def obtener_vectores_cvs_id(id, uniandes=False):
   cursor = connection.cursor()
 
   if not uniandes:
-    query = f"SELECT * FROM public.features_cv WHERE id = {id}".format(id)
+    query = f"SELECT * FROM public.features_cv WHERE id = '{id}'".format(id)
   else:
-    query = f"SELECT * FROM public.features_cv_uniandes WHERE id = {id}".format(id)
+    query = f"SELECT * FROM public.features_cv_uniandes WHERE id = '{id}'".format(id)
 
   cursor.execute(query)
   resultados = cursor.fetchall()
@@ -261,9 +259,9 @@ def obtener_vectores_oportunidades_id(id, uniandes=False):
   cursor = connection.cursor()
 
   if not uniandes:
-    query = f"SELECT * FROM public.features_projects WHERE id = {id}".format(id)
+    query = f"SELECT * FROM public.features_projects WHERE id = '{id}'".format(id)
   else:
-    query = f"SELECT * FROM public.features_projects_uniandes WHERE id = {id}".format(id)
+    query = f"SELECT * FROM public.features_projects_uniandes WHERE id = '{id}'".format(id)
 
   cursor.execute(query)
   resultados = cursor.fetchall()
