@@ -122,19 +122,19 @@ def conectar_base_datos():
 
 
 def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job, uniandes):
-    try:
-        if not uniandes:
-          cursor.execute(f"""INSERT INTO public.general_compatibility (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
-          connection.commit()
-        else:
-          cursor.execute(f"""INSERT INTO public.general_compatibility_uniandes (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
-          connection.commit()
+  try:
+      if not uniandes:
+        cursor.execute(f"""INSERT INTO public.general_compatibility (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
+        connection.commit()
+      else:
+        cursor.execute(f"""INSERT INTO public.general_compatibility_uniandes (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
+        connection.commit()
 
-        return "Actualización exitosa"
-    except psycopg2.Error as error:
-        print("Error al actualizar compatibilidad:", error)
-        connection.rollback()
-        return None
+      return "Actualización exitosa"
+  except psycopg2.Error as error:
+      print("Error al actualizar compatibilidad:", error)
+      connection.rollback()
+      return None
 
       
 
@@ -698,6 +698,19 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
   cursor = connection.cursor()
 
   if connection is None:
+      return None
+  
+  try:
+      if not uniandes:
+        cursor.execute(f"""DELETE FROM public.general_compatibility WHERE id_resume = '{id_cv}' AND id_job = '{id_job}' """.format(id_job=id_job,  id_cv=id_cv))
+        connection.commit()
+      else:
+        cursor.execute(f"""DELETE FROM public.general_compatibility_uniandes WHERE id_resume = '{id_cv}' AND id_job = '{id_job}' """.format(id_job=id_job, id_cv=id_cv))
+        connection.commit()
+
+  except psycopg2.Error as error:
+      print("Error al actualizar compatibilidad:", error)
+      connection.rollback()
       return None
   
   actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job, uniandes)
