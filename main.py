@@ -589,8 +589,6 @@ def calcular_porcentaje_similitud(features):
   modelo.predict_proba(features)
 
 def agregar_cv(id_cv, uniandes=False):
-  print('REVISANDO AGREGAR CV')
-  print(uniandes)
   data_cv = descargar_data_cv(id_cv, uniandes)
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
@@ -604,8 +602,6 @@ def agregar_cv(id_cv, uniandes=False):
   mejores_oportunidades_similitud = obtener_mejores_oportunidades_similitud(cluster, [vector], uniandes)
   ids = mejores_oportunidades_similitud.keys()
   lista_features = obtener_features_proyectos(ids, uniandes)
-  print(uniandes)
-  print(mejores_oportunidades_similitud)
   connection = conectar_base_datos()
   cursor = connection.cursor()
   if connection is None:
@@ -686,13 +682,7 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
 
   similitud_cos = cosine_similarity(vector_cv, vector_oportunidad)
 
-  print('vector_cv',vector_cv)
-
-  print('vector_oportunidad',vector_oportunidad)
-
-  print('similitud_cos',similitud_cos)
-
-  features_finales = [relacion_experiencia]+list(features) + [0]
+  features_finales = [relacion_experiencia]+list(features) + similitud_cos[0]
 
   X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
   X_scaled = scaler.transform(X)
