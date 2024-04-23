@@ -682,7 +682,7 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
 
   similitud_cos = cosine_similarity(vector_cv, vector_oportunidad)
 
-  features_finales = [relacion_experiencia]+list(features) + similitud_cos[0]
+  features_finales = [relacion_experiencia]+list(features) + list(similitud_cos[0])
 
   X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
   X_scaled = scaler.transform(X)
