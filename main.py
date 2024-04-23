@@ -686,7 +686,11 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
 
   similitud_cos = cosine_similarity(vector_cv, vector_oportunidad)
 
-  print(similitud_cos)
+  print('vector_cv',vector_cv)
+
+  print('vector_oportunidad',vector_oportunidad)
+
+  print('similitud_cos',similitud_cos)
 
   features_finales = [relacion_experiencia]+list(features) + [0]
 
