@@ -198,7 +198,7 @@ def insertar_features_proyectos(features_proyectos, uniandes=False):
 ##################################### OBTENER VECTORES CV ######################################
 ################################################################################################
 
-def obtener_vectores_cvs(cluster, uniandes=False):
+def obtener_vectores_cvs_cluster(cluster, uniandes=False):
   connection = conectar_base_datos()
   cursor = connection.cursor()
 
@@ -216,12 +216,29 @@ def obtener_vectores_cvs(cluster, uniandes=False):
   df_resultados = pd.DataFrame(resultados, columns=columnas)
   return df_resultados
 
+def obtener_vectores_cvs_id(id, uniandes=False):
+  connection = conectar_base_datos()
+  cursor = connection.cursor()
+
+  if not uniandes:
+    query = f"SELECT * FROM public.features_cv WHERE id = {id}".format(id)
+  else:
+    query = f"SELECT * FROM public.features_cv_uniandes WHERE id = {id}".format(id)
+
+  cursor.execute(query)
+  resultados = cursor.fetchall()
+  cursor.close()
+  connection.close()
+
+  columnas = [desc[0] for desc in cursor.description]
+  df_resultados = pd.DataFrame(resultados, columns=columnas)
+  return df_resultados.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1)
 ################################################################################################
 ################################# OBTENER VECTORES PROYECTOS ###################################
 ################################################################################################
 
 
-def obtener_vectores_oportunidades(cluster, uniandes=False):
+def obtener_vectores_oportunidades_cluster(cluster, uniandes=False):
   connection = conectar_base_datos()
   cursor = connection.cursor()
 
@@ -238,6 +255,24 @@ def obtener_vectores_oportunidades(cluster, uniandes=False):
   columnas = [desc[0] for desc in cursor.description]
   df_resultados = pd.DataFrame(resultados, columns=columnas)
   return df_resultados
+
+def obtener_vectores_oportunidades_id(id, uniandes=False):
+  connection = conectar_base_datos()
+  cursor = connection.cursor()
+
+  if not uniandes:
+    query = f"SELECT * FROM public.features_projects WHERE id = {id}".format(id)
+  else:
+    query = f"SELECT * FROM public.features_projects_uniandes WHERE id = {id}".format(id)
+
+  cursor.execute(query)
+  resultados = cursor.fetchall()
+  cursor.close()
+  connection.close()
+
+  columnas = [desc[0] for desc in cursor.description]
+  df_resultados = pd.DataFrame(resultados, columns=columnas)
+  return df_resultados.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1)
 
 ################################################################################################
 ##################################### OBTENER VECTORES CV ######################################
@@ -501,7 +536,7 @@ def clusterizar(descripcion):
   return cluster, vector[0]
 
 def obtener_mejores_oportunidades_similitud(cluster, vector_cv, uniandes=False):
-  vectores_oportunidades_cluster = obtener_vectores_oportunidades(cluster, uniandes)
+  vectores_oportunidades_cluster = obtener_vectores_oportunidades_cluster(cluster, uniandes)
   if len(vectores_oportunidades_cluster) == 0:
     return {}
   similitud_cos = cosine_similarity(vector_cv, vectores_oportunidades_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
@@ -509,7 +544,7 @@ def obtener_mejores_oportunidades_similitud(cluster, vector_cv, uniandes=False):
   return dict(zip(vectores_oportunidades_cluster.iloc[indices]['id'], similitud_cos[0][indices]))
 
 def obtener_mejores_cvs_similitud(cluster, vector_oportunidad, uniandes=False):
-  vectores_cvs_cluster = obtener_vectores_cvs(cluster, uniandes)
+  vectores_cvs_cluster = obtener_vectores_cvs_cluster(cluster, uniandes)
   if len(vectores_cvs_cluster) == 0:
     return {}
   similitud_cos = cosine_similarity(vector_oportunidad, vectores_cvs_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
@@ -646,6 +681,15 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
     relacion_experiencia = 0
   else:
     relacion_experiencia = features_cv['experiencia']/features_proyecto['experiencia']
+
+
+  vector_cv = obtener_vectores_cvs_id(id_cv, uniandes)
+  vector_oportunidad =obtener_vectores_oportunidades_id(id_job, uniandes)
+
+  similitud_cos = cosine_similarity(vector_cv, vector_oportunidad)
+
+  print(similitud_cos)
+
   features_finales = [relacion_experiencia]+list(features) + [0]
 
   X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
