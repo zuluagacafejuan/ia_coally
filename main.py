@@ -737,28 +737,37 @@ async def test():
 
 @app.post("/api/create_cv")
 def create_cv(request: CreateCVRequestModel):
-  id_cv = request.id_cv
-  uniandes = request.uniandes
-
   try:
-    agregar_cv(id_cv, uniandes)
+    id_cv = request.id_cv
+    uniandes = request.uniandes
+
+    try:
+      agregar_cv(id_cv, uniandes)
+    except:
+      agregar_cv(id_cv, not uniandes)
   except:
-    agregar_cv(id_cv, not uniandes)
+    return
 
 @app.post("/api/create_project")
 def create_project(request: CreateProjectRequestModel):
-  id_project = request.id_project
-  uniandes = request.uniandes
-
   try:
-    agregar_proyecto(id_project, uniandes)
+    id_project = request.id_project
+    uniandes = request.uniandes
+
+    try:
+      agregar_proyecto(id_project, uniandes)
+    except:
+      agregar_proyecto(id_project, not uniandes)
   except:
-    agregar_proyecto(id_project, not uniandes)
+    return
 
 @app.post("/api/add_applicant")
 def add_applicant(request: AddApplicantRequestModel):
-  id_project = request.id_project
-  id_cv = request.id_cv
-  uniandes = request.uniandes
+  try:
+    id_project = request.id_project
+    id_cv = request.id_cv
+    uniandes = request.uniandes
 
-  agregar_aplicante(id_project, id_cv, uniandes)
+    agregar_aplicante(id_project, id_cv, uniandes)
+  except:
+    return
