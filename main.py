@@ -386,7 +386,7 @@ def extraer_major(texto):
   lista_majors = []
 
   for k,v in carreras_a_majors_procesado.items():
-    if texto_procesado.find(k) != -1:
+    if k in texto_procesado.split():
       lista_majors+=v.split()
 
   return list(set(lista_majors))
@@ -396,7 +396,7 @@ def extraer_soft_skills(texto):
   lista_soft_skills = []
 
   for k,v in soft_skills_procesado.items():
-    if texto_procesado.find(k) != -1:
+    if k in texto_procesado.split():
       lista_soft_skills+=v.split()
 
   return list(set(lista_soft_skills))
@@ -406,7 +406,7 @@ def extraer_hard_skills(texto):
   lista_hard_skills = []
 
   for k,v in hard_skills_procesado.items():
-    if texto_procesado.find(k) != -1:
+    if k in texto_procesado.split():
       lista_hard_skills+=v.split()
 
   return list(set(lista_hard_skills))
