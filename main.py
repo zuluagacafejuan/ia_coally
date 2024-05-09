@@ -389,7 +389,7 @@ def extraer_major(texto):
     if (len(k.split())> 1 and texto_procesado.find(k) != -1) or (len(k.split()) == 1 and k in texto_procesado.split()):
       lista_majors+=v.split()
 
-  return list(set(lista_majors))
+  return list(lista_majors)
 
 def extraer_soft_skills(texto):
   texto_procesado = procesar_texto(texto)
