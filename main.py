@@ -392,11 +392,8 @@ def extraer_major(texto):
     if (len(k.split())> 1 and texto_procesado.find(k) != -1) or (len(k.split()) == 1 and k in texto_procesado.split()):
       lista_majors+=v.split()
   
-  print(keywords_procesado)
-  print(lista_majors)
-
   for key, values in keywords_procesado.items():
-    if key in lista_majors:
+    if key in ' '.join(lista_majors):
       lista_majors+= values
 
   return list(lista_majors)
@@ -411,7 +408,7 @@ def extraer_soft_skills(texto):
       
 
   for key, values in keywords_procesado.items():
-    if key in lista_soft_skills:
+    if key in ' '.join(lista_soft_skills):
       lista_soft_skills+= values
 
   return list(set(lista_soft_skills))
@@ -425,7 +422,7 @@ def extraer_hard_skills(texto):
       lista_hard_skills+=v.split()
 
   for key, values in keywords_procesado.items():
-    if key in lista_hard_skills:
+    if key in ' '.join(lista_hard_skills):
       lista_hard_skills+= values
 
   return list(set(lista_hard_skills))
