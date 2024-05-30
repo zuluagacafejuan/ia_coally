@@ -519,10 +519,10 @@ def extraer_features_cv(data_cv_transformada):
   data_cv_transformada['descripcion_carrera'] = data_cv_transformada['extracto']+' '+ data_cv_transformada['Titulos'] + data_cv_transformada['cargos']
   dict_features['carrera'] = (lambda x: ' '.join(extraer_major(x)))(data_cv_transformada['descripcion_carrera'])
 
-  data_cv_transformada['descripcion_softskills'] = data_cv_transformada['extracto']+' '+ data_cv_transformada['aptitudes_principales']
+  data_cv_transformada['descripcion_softskills'] = data_cv_transformada['extracto']+' '+ data_cv_transformada['aptitudes_principales'] + data_cv_transformada['cargos']
   dict_features['softskills'] = (lambda x: ' '.join(extraer_soft_skills(x)))(data_cv_transformada['descripcion_softskills'])
 
-  data_cv_transformada['descripcion_hardskills'] = data_cv_transformada['extracto']+' '+ data_cv_transformada['aptitudes_principales']
+  data_cv_transformada['descripcion_hardskills'] = data_cv_transformada['extracto']+' '+ data_cv_transformada['aptitudes_principales'] + data_cv_transformada['cargos']
   dict_features['hardskills'] = (lambda x: ' '.join(extraer_hard_skills(x)))(data_cv_transformada['descripcion_hardskills'])
   return dict_features
 
@@ -534,12 +534,16 @@ def extraer_features_proyecto(data_proyecto_transformada):
 
   data_proyecto_transformada['descripcion_carrera'] = data_proyecto_transformada['DescribeProyecto']+' '+data_proyecto_transformada['NombreOportunidad']+' '+data_proyecto_transformada['habilidadesTecnicas']+' '+data_proyecto_transformada['SeleccionaCarrera']+' '+data_proyecto_transformada['empleos_alternativos']
   dict_features['carrera'] = (lambda x: ' '.join(extraer_major(x)))(data_proyecto_transformada['descripcion_carrera'])
+  if 'sistem' in dict_features['carrera'] and 'ingenieri' in dict_features['carrera']:
+    dict_features['carrera'] += 'frontend desarroll backend'
 
   data_proyecto_transformada['descripcion_softskills'] = data_proyecto_transformada['DescribeProyecto']+' '+data_proyecto_transformada['habilidadesBlandas']
   dict_features['softskills'] = (lambda x: ' '.join(extraer_soft_skills(x)))(data_proyecto_transformada['descripcion_softskills'])
 
   data_proyecto_transformada['descripcion_hardskills'] = data_proyecto_transformada['DescribeProyecto']+' '+data_proyecto_transformada['habilidadesTecnicas']
   dict_features['hardskills'] = (lambda x: ' '.join(extraer_hard_skills(x)))(data_proyecto_transformada['descripcion_hardskills'])
+  if 'program' in dict_features['hardskills']:
+    dict_features['hardskills'] += 'frontend desarroll backend'
   return dict_features
 
 def clusterizar(descripcion):
