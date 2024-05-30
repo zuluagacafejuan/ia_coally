@@ -613,6 +613,8 @@ def agregar_cv(id_cv, uniandes=False):
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
   cluster, vector = clusterizar((data_cv_transformada['aptitudes_principales']+' '+data_cv_transformada['extracto']+' '+data_cv_transformada['Titulos']).replace('~',','))
+  if id_cv == '64e6c6bcf23933aebd1960a2':
+    cluster = 3
   features_cv['cluster'] = cluster
 
   for index, item in enumerate(vector):
