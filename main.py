@@ -23,6 +23,236 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Union
 
+import pickle as pkl
+import spacy
+from unidecode import unidecode
+import re
+from typing import List
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.decomposition import TruncatedSVD
+from typing import Union
+import numpy as np
+from spacy.lang.es.stop_words import STOP_WORDS
+from string import punctuation
+from heapq import nlargest
+
+
+class Preprocessor:
+    def __init__(self):
+        """
+        Initializes the Preprocessor object.
+        """
+        self.nlp = spacy.load("es_core_news_sm")
+        self.stopwords_spacy = self.nlp.Defaults.stop_words
+        r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/trigram_stopwords.pkl')
+        self.set_trigram_stopwords = pkl.loads(r.content)
+        r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/context.pkl')
+        self.context = pkl.loads(r.content)
+
+    def translate(self, texto: str) -> str:
+      texto = limpiar_espacio(texto)
+      patron_url = re.compile(r"http[s]?://\S+")
+      texto_sin_urls = patron_url.sub('', texto)
+      texto_sin_urls = texto_sin_urls.replace('_', ' ')
+      try:
+        resultado_traduccion = traductor.translate(texto_sin_urls, dest='es').text
+      except Exception as e:
+        print(e)
+        resultado_traduccion = texto_sin_urls
+
+      return resultado_traduccion
+
+    def textSummarizer(self, text: str, percentage: float) -> str:
+        """
+        Summarizes the given text based on the specified percentage of sentences to include.
+
+        Args:
+            text (str): Input text to summarize.
+            percentage (float): Percentage of sentences to include in the summary.
+
+        Returns:
+            str: Summary of the input text.
+        """
+        doc = self.nlp(text)
+
+        freq_of_word = {}
+        
+        # Text cleaning and vectorization
+        for word in doc:
+            if word.text.lower() not in list(STOP_WORDS):
+                if word.text.lower() not in punctuation:
+                    if word.text not in freq_of_word.keys():
+                        freq_of_word[word.text] = 1
+                    else:
+                        freq_of_word[word.text] += 1
+
+        max_freq = max(freq_of_word.values())
+
+        # Normalization of word frequency
+        for word in freq_of_word.keys():
+            freq_of_word[word] = freq_of_word[word] / max_freq
+
+        # Weighing each sentence based on the frequency of tokens
+        sent_tokens = [sent for sent in doc.sents]
+        sent_scores = {}
+        for sent in sent_tokens:
+            for word in sent:
+                if word.text.lower() in freq_of_word.keys():
+                    if sent not in sent_scores.keys():
+                        sent_scores[sent] = freq_of_word[word.text.lower()]
+                    else:
+                        sent_scores[sent] += freq_of_word[word.text.lower()]
+
+        len_tokens = int(len(sent_tokens) * percentage)
+
+        # Selecting sentences with maximum scores for summary
+        summary = nlargest(n=len_tokens, iterable=sent_scores, key=sent_scores.get)
+
+        # Prepare final summary
+        final_summary = [word.text for word in summary]
+
+        # Convert summary to a string
+        summary = " ".join(final_summary)
+
+        # Return final summary
+        return summary
+
+    def remove_accents_and_preserve_n(self, text: str) -> str:
+        """
+        Removes accents from text while preserving 'ñ' and 'Ñ'.
+
+        Args:
+            text (str): Input text.
+
+        Returns:
+            str: Text with accents removed.
+        """
+        text = " ".join(text.split())
+        parts = re.split(r'([ñÑ])', text)
+        text_no_accents = ''.join([(unidecode(x).lower() if x != 'ñ' and x != 'Ñ' else x) for x in parts])
+        return text_no_accents
+    
+    def extract_trigrams(self, text: str) -> List[str]:
+        """
+        Extracts trigrams from text.
+
+        Args:
+            text (str): Input text.
+
+        Returns:
+            List[str]: Trigrams extracted from text.
+        """
+        words = re.findall(r'\b\w+\b', text.lower())
+        trigrams = [f"{words[i]} {words[i+1]} {words[i+2]}" for i in range(len(words) - 2)]
+        return trigrams
+
+    def remove_spacy_stopwords(self, text: str) -> str:
+        """
+        Removes Spacy stopwords from text.
+
+        Args:
+            text (str): Input text.
+
+        Returns:
+            str: Text with Spacy stopwords removed.
+        """
+        return ' '.join([word.text for word in self.nlp(text) if word.text.lower() not in self.stopwords_spacy])
+
+    def remove_stopwords(self, trigrams: List[str]) -> str:
+        """
+        Removes stopwords from trigrams.
+
+        Args:
+            trigrams (List[str]): Trigrams.
+
+        Returns:
+            str: Trigrams with stopwords removed.
+        """
+        return self.remove_spacy_stopwords(" ".join(set(" ".join([trigram for trigram in trigrams if trigram not in self.set_trigram_stopwords]).split())))
+
+    def lemmatize(self, text: str) -> str:
+        """
+        Lemmatizes text.
+
+        Args:
+            text (str): Input text.
+
+        Returns:
+            str: Lemmatized text.
+        """
+        text_no_punctuation = re.sub(r'[^\w\s]', '', text)
+        words = text_no_punctuation.lower().split()
+        lemmatized_words = [word for word in words]
+        processed_text = ' '.join(lemmatized_words)
+        return processed_text
+
+    def add_context(self, sentence: str) -> str:
+        """
+        Adds context to a sentence.
+
+        Args:
+            sentence (str): Input sentence.
+
+        Returns:
+            str: Sentence with added context.
+        """
+        sentence = self.remove_accents_and_preserve_n(sentence)
+        words = sentence.split()
+        sentence_with_context = [self.context[word.lower()] if word.lower() in self.context else word for word in words]
+        return ' '.join(sentence_with_context)
+
+    def transform(self, text: str) -> str:
+        """
+        Executes the entire text processing pipeline.
+
+        Args:
+            text (str): Input text.
+
+        Returns:
+            str: Processed text.
+        """
+        text_traducido = self.translate(text)
+        try:
+            resumen = self.textSummarizer(text_traducido, 0.25)
+        except:
+            resumen = text_traducido
+        text = resumen if len(resumen.split()) > 10 else text
+        text = self.add_context(text)
+        trigrams_list = self.extract_trigrams(text)
+        processed_text = self.remove_stopwords(trigrams_list)
+        return self.lemmatize(processed_text)
+
+
+class Vectorizer:
+    def __init__(self):
+        """
+        Initializes the Vectorizer object.
+        """
+        r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/vectorizer.pkl')
+        self.vectorizer = pkl.loads(r.content)
+        r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/svd.pkl')
+        self.svd = pkl.loads(r.content)
+
+    def transform(self, preprocessed_text: Union[str, list]) -> np.ndarray:
+        """
+        Transforms preprocessed text into vectors.
+
+        Args:
+            preprocessed_text (Union[str, list]): Preprocessed text or list of preprocessed texts.
+
+        Returns:
+            np.ndarray: Transformed vectors.
+        """
+        if isinstance(preprocessed_text, str):
+            preprocessed_text = [preprocessed_text]
+
+        vector = self.vectorizer.transform(preprocessed_text)
+        reduced_vector = self.svd.transform(vector)
+        return reduced_vector
+
+preprocessor = Preprocessor()
+vectorizer = Vectorizer()
 
 
 class CreateCVRequestModel(BaseModel):
@@ -82,22 +312,22 @@ if r.status_code == 200:
 else:
     print("Error al obtener el archivo desde la URL.")
 
-r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/model.pkl')
-if r.status_code == 200:
-    # Crear un archivo temporal para guardar el contenido descargado
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(r.content)
-        temp_file_path = temp_file.name
+# r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/model.pkl')
+# if r.status_code == 200:
+#     # Crear un archivo temporal para guardar el contenido descargado
+#     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+#         temp_file.write(r.content)
+#         temp_file_path = temp_file.name
 
-    # Cargar el archivo desde el archivo temporal con joblib.load()
-    modelo = joblib.load(temp_file_path)
+#     # Cargar el archivo desde el archivo temporal con joblib.load()
+#     modelo = joblib.load(temp_file_path)
 
-    # Eliminar el archivo temporal después de cargarlo
-    os.unlink(temp_file_path)
+#     # Eliminar el archivo temporal después de cargarlo
+#     os.unlink(temp_file_path)
 
-    print("Archivo cargado exitosamente.")
-else:
-    print("Error al obtener el archivo desde la URL.")
+#     print("Archivo cargado exitosamente.")
+# else:
+#     print("Error al obtener el archivo desde la URL.")
 
 r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/scaler.pkl')
 scaler = pkl.loads(r.content)
@@ -126,8 +356,9 @@ def conectar_base_datos():
 
 def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job, uniandes):
   try:
+    
       if not uniandes:
-        cursor.execute(f"""INSERT INTO public.general_compatibility (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
+        cursor.execute(f"""INSERT INTO public.general_compatibility_test (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
         connection.commit()
       else:
         cursor.execute(f"""INSERT INTO public.general_compatibility_uniandes (id_resume, id_job, compatibility) VALUES ('{id_cv}','{id_job}',{compatibilidad}) """.format(id_job=id_job, compatibilidad=compatibilidad, id_cv=id_cv))
@@ -139,7 +370,6 @@ def actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id_job,
       connection.rollback()
       return None
 
-      
 
 ################################################################################################
 #################################### INSERTAR FEATURES CV ######################################
@@ -150,6 +380,8 @@ def insertar_features_cv(features_cv, uniandes=False):
   features_cv['cluster'] = int(features_cv['cluster'])
   features_cv['experiencia'] = int(features_cv['experiencia'])
 
+  
+
   connection = conectar_base_datos()
   cursor = connection.cursor()
 
@@ -157,7 +389,7 @@ def insertar_features_cv(features_cv, uniandes=False):
   placeholders = ', '.join(['%s'] * len(features_cv))
   
   if not uniandes:
-    query = f"INSERT INTO public.features_cv ({columns}) VALUES ({placeholders})"
+    query = f"INSERT INTO public.features_cv_test ({columns}) VALUES ({placeholders})"
   else:
     query = f"INSERT INTO public.features_cv_uniandes ({columns}) VALUES ({placeholders})"
 
@@ -184,7 +416,7 @@ def insertar_features_proyectos(features_proyectos, uniandes=False):
   placeholders = ', '.join(['%s'] * len(features_proyectos))
 
   if not uniandes:
-    query = f"INSERT INTO public.features_projects ({columns}) VALUES ({placeholders})"
+    query = f"INSERT INTO public.features_projects_test ({columns}) VALUES ({placeholders})"
   else:
     query = f"INSERT INTO public.features_projects_uniandes ({columns}) VALUES ({placeholders})"
 
@@ -204,9 +436,11 @@ def obtener_vectores_cvs_cluster(cluster, uniandes=False):
   cursor = connection.cursor()
 
   if not uniandes:
-    query = f"SELECT * FROM public.features_cv WHERE cluster = {cluster}".format(cluster)
+    query = f"SELECT * FROM public.features_cv_test WHERE cluster = {cluster}".format(cluster)
   else:
     query = f"SELECT * FROM public.features_cv_uniandes WHERE cluster = {cluster}".format(cluster)
+
+  print(query)
 
   cursor.execute(query)
   resultados = cursor.fetchall()
@@ -222,7 +456,7 @@ def obtener_vectores_cvs_id(id, uniandes=False):
   cursor = connection.cursor()
 
   if not uniandes:
-    query = f"SELECT * FROM public.features_cv WHERE id = '{id}'".format(id)
+    query = f"SELECT * FROM public.features_cv_test WHERE id = '{id}'".format(id)
   else:
     query = f"SELECT * FROM public.features_cv_uniandes WHERE id = '{id}'".format(id)
 
@@ -244,7 +478,7 @@ def obtener_vectores_oportunidades_cluster(cluster, uniandes=False):
   cursor = connection.cursor()
 
   if not uniandes:
-    query = f"SELECT * FROM public.features_projects WHERE cluster = {cluster}".format(cluster)
+    query = f"SELECT * FROM public.features_projects_test WHERE cluster = {cluster}".format(cluster)
   else:
     query = f"SELECT * FROM public.features_projects_uniandes WHERE cluster = {cluster}".format(cluster)
 
@@ -262,7 +496,7 @@ def obtener_vectores_oportunidades_id(id, uniandes=False):
   cursor = connection.cursor()
 
   if not uniandes:
-    query = f"SELECT * FROM public.features_projects WHERE id = '{id}'".format(id)
+    query = f"SELECT * FROM public.features_projects_test WHERE id = '{id}'".format(id)
   else:
     query = f"SELECT * FROM public.features_projects_uniandes WHERE id = '{id}'".format(id)
 
@@ -291,7 +525,7 @@ def obtener_features_cv(ids_cvs, uniandes):
   ids_parametro = ', '.join(ids_cvs)
 
   if not uniandes:
-    query = f"SELECT * FROM public.features_cv WHERE id in ({ids_parametro})".format(ids_parametro)
+    query = f"SELECT * FROM public.features_cv_test WHERE id in ({ids_parametro})".format(ids_parametro)
   else:
     query = f"SELECT * FROM public.features_cv_uniandes WHERE id in ({ids_parametro})".format(ids_parametro)
 
@@ -320,7 +554,7 @@ def obtener_features_proyectos(ids_proyectos, uniandes):
   ids_parametro = ', '.join(ids_proyectos)
 
   if not uniandes:
-    query = f"SELECT * FROM public.features_projects WHERE id in ({ids_parametro})".format(ids_parametro)
+    query = f"SELECT * FROM public.features_projects_test WHERE id in ({ids_parametro})".format(ids_parametro)
   else:
     query = f"SELECT * FROM public.features_projects_uniandes WHERE id in ({ids_parametro})".format(ids_parametro)
 
@@ -546,12 +780,17 @@ def extraer_features_proyecto(data_proyecto_transformada):
     dict_features['hardskills'] += 'frontend desarroll backend'
   return dict_features
 
+# def clusterizar(descripcion):
+#   if type(descripcion) == str:
+#     descripcion = [descripcion]
+#   vector = pipeline.named_steps['preprocess'].transform(descripcion)
+#   cluster = pipeline.predict(descripcion)[0]
+#   return cluster, vector[0]
+
 def clusterizar(descripcion):
-  if type(descripcion) == str:
-    descripcion = [descripcion]
-  vector = pipeline.named_steps['preprocess'].transform(descripcion)
-  cluster = pipeline.predict(descripcion)[0]
-  return cluster, vector[0]
+  descripcion_procesada = preprocessor.transform(descripcion)
+  vector = vectorizer.transform(descripcion_procesada)
+  return 0, vector[0]
 
 def obtener_mejores_oportunidades_similitud(cluster, vector_cv, uniandes=False):
   vectores_oportunidades_cluster = obtener_vectores_oportunidades_cluster(cluster, uniandes)
@@ -563,6 +802,7 @@ def obtener_mejores_oportunidades_similitud(cluster, vector_cv, uniandes=False):
 
 def obtener_mejores_cvs_similitud(cluster, vector_oportunidad, uniandes=False):
   vectores_cvs_cluster = obtener_vectores_cvs_cluster(cluster, uniandes)
+
   if len(vectores_cvs_cluster) == 0:
     return {}
   similitud_cos = cosine_similarity(vector_oportunidad, vectores_cvs_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
@@ -612,13 +852,16 @@ def agregar_cv(id_cv, uniandes=False):
   data_cv = descargar_data_cv(id_cv, uniandes)
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
-  cluster, vector = clusterizar((data_cv_transformada['aptitudes_principales']+' '+data_cv_transformada['extracto']+' '+data_cv_transformada['Titulos']).replace('~',','))
+  cluster, vector = clusterizar((data_cv_transformada['extracto']+' '+data_cv_transformada['Titulos']).replace('~',','))
   if id_cv == '64e6c6bcf23933aebd1960a2':
     cluster = 3
+  cluster = 0
   features_cv['cluster'] = cluster
 
   for index, item in enumerate(vector):
     features_cv['x'+str(index+1)] = item
+
+  
 
   insertar_features_cv(features_cv, uniandes)
   mejores_oportunidades_similitud = obtener_mejores_oportunidades_similitud(cluster, [vector], uniandes)
@@ -643,7 +886,8 @@ def agregar_cv(id_cv, uniandes=False):
     X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
 
     X_scaled = scaler.transform(X)
-    compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
+    # compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
+    compatibilidad = max(0, min(similitud*1.5, 1))
 
     actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id, uniandes)
    
@@ -651,11 +895,28 @@ def agregar_cv(id_cv, uniandes=False):
   cursor.close()
   return 200
 
+from time import time
+
 def agregar_proyecto(id_proyecto, uniandes=False):
+  print(id_proyecto)
+  tic = time()
   data_proyecto = descargar_data_proyecto(id_proyecto, uniandes)
+  toc = time()
+  print('descargar_data', toc-tic)
+
+  tic = time()
   data_proyecto_transformada = transformar_data_proyecto(data_proyecto)
+  toc = time()
+  print('transformar', toc-tic)
+  tic = time()
   features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
+  toc = time()
+
+  print('extraer_features', toc-tic)
   cluster, vector = clusterizar((data_proyecto_transformada['NombreOportunidad']+' '+data_proyecto_transformada['DescribeProyecto']+' '+data_proyecto_transformada['responsabilidadYfunciones']+' '+data_proyecto_transformada['habilidadesTecnicas']+' '+data_proyecto_transformada['habilidadesBlandas']+' '+data_proyecto_transformada['empleos_alternativos']+' '+data_proyecto_transformada['SeleccionaCarrera']).replace('~',','))
+
+
+  cluster = 0
   features_proyecto['cluster'] = cluster
   for index, item in enumerate(vector):
     features_proyecto['x'+str(index+1)] = item
@@ -682,9 +943,12 @@ def agregar_proyecto(id_proyecto, uniandes=False):
 
     X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
     X_scaled = scaler.transform(X)
-    compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
+    # compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
+    compatibilidad = max(0, min(similitud*1.5, 1))
+
 
     actualizar_compatibilidad(connection, cursor, compatibilidad, id, id_proyecto, uniandes)
+
   return 200
 
 def agregar_aplicante(id_job, id_cv, uniandes = False):
@@ -714,7 +978,8 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
 
   similitud = cosine_similarity(cv_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1), oportunidad_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
 
-  compatibilidad = max(modelo.predict_proba(X_scaled)[0]*min(similitud[0][0]/0.6, 1),0)
+  # compatibilidad = max(modelo.predict_proba(X_scaled)[0]*min(similitud[0][0]/0.6, 1),0)
+  compatibilidad = max(0, min(similitud*1.5, 1))
 
   connection = conectar_base_datos()
   cursor = connection.cursor()
@@ -724,7 +989,7 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
   
   try:
       if not uniandes:
-        cursor.execute(f"""DELETE FROM public.general_compatibility WHERE id_resume = '{id_cv}' AND id_job = '{id_job}' """.format(id_job=id_job,  id_cv=id_cv))
+        cursor.execute(f"""DELETE FROM public.general_compatibility_test WHERE id_resume = '{id_cv}' AND id_job = '{id_job}' """.format(id_job=id_job,  id_cv=id_cv))
         connection.commit()
       else:
         cursor.execute(f"""DELETE FROM public.general_compatibility_uniandes WHERE id_resume = '{id_cv}' AND id_job = '{id_job}' """.format(id_job=id_job, id_cv=id_cv))
