@@ -37,6 +37,10 @@ from spacy.lang.es.stop_words import STOP_WORDS
 from string import punctuation
 from heapq import nlargest
 
+import nltk
+from nltk.stem import SnowballStemmer
+from nltk.tokenize import word_tokenize
+
 
 class Preprocessor:
     def __init__(self):
@@ -49,6 +53,21 @@ class Preprocessor:
         self.set_trigram_stopwords = pkl.loads(r.content)
         r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/context.pkl')
         self.context = pkl.loads(r.content)
+
+    def stem_sentence_spanish(self, sentence):
+        # Inicializar el stemmer para español
+        stemmer = SnowballStemmer('spanish')
+        
+        # Tokenizar la frase en palabras
+        words = word_tokenize(sentence)
+        
+        # Aplicar stemming a cada palabra
+        stemmed_words = [stemmer.stem(word) for word in words]
+        
+        # Unir las palabras procesadas en una frase
+        stemmed_sentence = ' '.join(stemmed_words)
+        
+        return stemmed_sentence
 
     def translate(self, texto: str) -> str:
       texto = limpiar_espacio(texto)
@@ -185,7 +204,8 @@ class Preprocessor:
         words = text_no_punctuation.lower().split()
         lemmatized_words = [word for word in words]
         processed_text = ' '.join(lemmatized_words)
-        return processed_text
+        texto_preprocesado = self.stem_sentence_spanish(processed_text)
+        return texto_preprocesado
 
     def add_context(self, sentence: str) -> str:
         """
