@@ -824,7 +824,7 @@ def obtener_mejores_oportunidades_similitud(cluster, vector_cv, uniandes=False):
   if len(vectores_oportunidades_cluster) == 0:
     return {}
   similitud_cos = cosine_similarity(vector_cv, vectores_oportunidades_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
-  indices = np.where(similitud_cos[0] > 0.2)[0]
+  indices = np.where(similitud_cos[0] > 0.35)[0]
   return dict(zip(vectores_oportunidades_cluster.iloc[indices]['id'], similitud_cos[0][indices]))
 
 def obtener_mejores_cvs_similitud(cluster, vector_oportunidad, uniandes=False):
@@ -833,7 +833,7 @@ def obtener_mejores_cvs_similitud(cluster, vector_oportunidad, uniandes=False):
   if len(vectores_cvs_cluster) == 0:
     return {}
   similitud_cos = cosine_similarity(vector_oportunidad, vectores_cvs_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
-  indices = np.where(similitud_cos[0] > 0.2)[0]
+  indices = np.where(similitud_cos[0] > 0.35)[0]
   return dict(zip(vectores_cvs_cluster.iloc[indices]['id'], similitud_cos[0][indices]))
 
 def calcular_features(features_cv, features_proyecto):
