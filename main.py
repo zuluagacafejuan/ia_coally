@@ -52,7 +52,7 @@ class Preprocessor:
         self.stopwords_spacy = self.nlp.Defaults.stop_words
         r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/trigram_stopwords.pkl')
         self.set_trigram_stopwords = pkl.loads(r.content)
-        r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/context.pkl')
+        r = requests.get('https://resumescreening-ml-coally.s3.amazonaws.com/contexto.pkl')
         self.context = pkl.loads(r.content)
 
     def stem_sentence_spanish(self, sentence):
@@ -138,20 +138,22 @@ class Preprocessor:
         # Return final summary
         return summary
 
-    def remove_accents_and_preserve_n(self, text: str) -> str:
-        """
-        Removes accents from text while preserving 'ñ' and 'Ñ'.
-
-        Args:
-            text (str): Input text.
-
-        Returns:
-            str: Text with accents removed.
-        """
-        text = " ".join(text.split())
-        parts = re.split(r'([ñÑ])', text)
-        text_no_accents = ''.join([(unidecode(x).lower() if x != 'ñ' and x != 'Ñ' else x) for x in parts])
-        return text_no_accents
+    def remove_accents_and_preserve_n(self, s: str) -> str:
+        replacements = (
+            ("á", "a"),
+            ("é", "e"),
+            ("í", "i"),
+            ("ó", "o"),
+            ("ú", "u"),
+            ("Á", "A"),
+            ("É", "E"),
+            ("Í", "I"),
+            ("Ó", "O"),
+            ("Ú", "U"),
+        )
+        for a, b in replacements:
+            s = s.replace(a, b).replace(a.upper(), b.upper())
+        return s
     
     def extract_trigrams(self, text: str) -> List[str]:
         """
@@ -208,28 +210,19 @@ class Preprocessor:
         texto_preprocesado = self.stem_sentence_spanish(processed_text)
         return texto_preprocesado
 
-    def add_context(self, sentence: str) -> str:
-        """
-        Adds context to a sentence.
-
-        Args:
-            sentence (str): Input sentence.
-
-        Returns:
-            str: Sentence with added context.
-        """
-        frase = self.remove_accents_and_preserve_n(sentence)
+    def add_context(self, frase: str) -> str:
+        frase = self.remove_accents_and_preserve_n(frase)
         
         # Crear una lista para almacenar las palabras reemplazadas
         frase_con_contexto = []
         
         # Iterar sobre todas las palabras clave del contexto
+
         for palabra_clave, descripcion in self.context.items():
             # Utilizar una expresión regular para buscar la palabra clave en la frase
             palabra_clave_regex = re.compile(r'\b{}\b'.format(re.escape(palabra_clave)), re.IGNORECASE)
             # Reemplazar la palabra clave por su descripción en la frase
             frase = palabra_clave_regex.sub(descripcion, frase)
-        
         return frase
 
     def transform(self, text: str) -> str:
@@ -251,6 +244,7 @@ class Preprocessor:
             resumen = self.textSummarizer(text_traducido, 0.25)
         except:
             resumen = text_traducido
+
         text = resumen if len(resumen.split()) > 10 else text
         text = self.add_context(text)
         trigrams_list = self.extract_trigrams(text)
@@ -280,8 +274,6 @@ class Vectorizer:
         """
         if isinstance(preprocessed_text, str):
             preprocessed_text = [preprocessed_text]
-
-        print(preprocessed_text)
 
         vector = self.vectorizer.transform(preprocessed_text)
         reduced_vector = self.svd.transform(vector)
@@ -476,7 +468,6 @@ def obtener_vectores_cvs_cluster(cluster, uniandes=False):
   else:
     query = f"SELECT * FROM public.features_cv_uniandes WHERE cluster = {cluster}".format(cluster)
 
-  print(query)
 
   cursor.execute(query)
   resultados = cursor.fetchall()
@@ -889,7 +880,7 @@ def agregar_cv(id_cv, uniandes=False):
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
   
-  print('llego1')
+  print(data_cv_transformada['extracto'])
   cluster, vector = clusterizar((data_cv_transformada['extracto']).replace('~',','))
   cluster = 0
   features_cv['cluster'] = cluster
@@ -934,21 +925,14 @@ def agregar_cv(id_cv, uniandes=False):
 from time import time
 
 def agregar_proyecto(id_proyecto, uniandes=False):
-  print(id_proyecto)
-  tic = time()
+
   data_proyecto = descargar_data_proyecto(id_proyecto, uniandes)
-  toc = time()
-  print('descargar_data', toc-tic)
 
-  tic = time()
+
   data_proyecto_transformada = transformar_data_proyecto(data_proyecto)
-  toc = time()
-  print('transformar', toc-tic)
-  tic = time()
-  features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
-  toc = time()
 
-  print('extraer_features', toc-tic)
+  features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
+
   cluster, vector = clusterizar((data_proyecto_transformada['DescribeProyecto']).replace('~',','))
 
 
@@ -973,10 +957,6 @@ def agregar_proyecto(id_proyecto, uniandes=False):
       relacion_experiencia = 0
     else:
       relacion_experiencia = features['experiencia']/features_proyecto['experiencia']
-
-    if id_proyecto == '66327a208fb39e0019dd9dc6' and id == '62e3673f9d31790018baf62e':
-       print(similitud)
-
 
     features_finales = [relacion_experiencia]+list(calcular_features(features, features_proyecto)) + [similitud]
 
