@@ -246,7 +246,7 @@ class Preprocessor:
           text_traducido = self.translate(text)
         else:
            text_traducido = text
-           
+
         try:
             resumen = self.textSummarizer(text_traducido, 0.25)
         except:
@@ -922,7 +922,8 @@ def agregar_cv(id_cv, uniandes=False):
 
     X_scaled = scaler.transform(X)
     # compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
-    compatibilidad = max(0, min(similitud*1.5, 1))
+    similitud_escalada = similitud*1.5 if similitud > 0.35 else similitud*1.1
+    compatibilidad = max(0, min(similitud_escalada, 1))
 
     actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id, uniandes)
    
@@ -982,7 +983,8 @@ def agregar_proyecto(id_proyecto, uniandes=False):
     X = pd.DataFrame({k:[v] for k,v in zip(['relacion_experiencia', 'porcentaje_tech', 'porcentaje_carrera', 'similitud'],features_finales)})
     X_scaled = scaler.transform(X)
     # compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
-    compatibilidad = max(0, min(similitud*1.5, 1))
+    similitud_escalada = similitud*1.5 if similitud > 0.35 else similitud*1.1
+    compatibilidad = max(0, min(similitud_escalada, 1))
 
 
     actualizar_compatibilidad(connection, cursor, compatibilidad, id, id_proyecto, uniandes)
@@ -1017,7 +1019,8 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
   similitud = cosine_similarity(cv_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1), oportunidad_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
 
   # compatibilidad = max(modelo.predict_proba(X_scaled)[0]*min(similitud[0][0]/0.6, 1),0)
-  compatibilidad = max(0, min(similitud*1.5, 1))
+  similitud_escalada = similitud*1.5 if similitud > 0.35 else similitud*1.1
+  compatibilidad = max(0, min(similitud_escalada, 1))
 
   connection = conectar_base_datos()
   cursor = connection.cursor()
