@@ -888,6 +888,8 @@ def agregar_cv(id_cv, uniandes=False):
   for index, item in enumerate(vector):
     features_cv['x'+str(index+1)] = item
 
+  print('llego1')
+
   insertar_features_cv(features_cv, uniandes)
   mejores_oportunidades_similitud = obtener_mejores_oportunidades_similitud(cluster, [vector], uniandes)
   ids = mejores_oportunidades_similitud.keys()
@@ -912,7 +914,6 @@ def agregar_cv(id_cv, uniandes=False):
 
     X_scaled = scaler.transform(X)
     # compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
-    print('llego')
     compatibilidad = max(0, min(similitud*1.5, 1))
 
     actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id, uniandes)
