@@ -883,7 +883,7 @@ def agregar_cv(id_cv, uniandes=False):
   features_cv = extraer_features_cv(data_cv_transformada)
   
   print('llego1')
-  cluster, vector = clusterizar((data_cv_transformada['extracto']+' '+data_cv_transformada['Titulos']).replace('~',','))
+  cluster, vector = clusterizar((data_cv_transformada['extracto']).replace('~',','))
   cluster = 0
   features_cv['cluster'] = cluster
 
@@ -941,7 +941,7 @@ def agregar_proyecto(id_proyecto, uniandes=False):
   toc = time()
 
   print('extraer_features', toc-tic)
-  cluster, vector = clusterizar((data_proyecto_transformada['NombreOportunidad']+' '+data_proyecto_transformada['DescribeProyecto']+' '+data_proyecto_transformada['responsabilidadYfunciones']+' '+data_proyecto_transformada['habilidadesTecnicas']+' '+data_proyecto_transformada['habilidadesBlandas']+' '+data_proyecto_transformada['empleos_alternativos']+' '+data_proyecto_transformada['SeleccionaCarrera']).replace('~',','))
+  cluster, vector = clusterizar((data_proyecto_transformada['NombreOportunidad']+' '+data_proyecto_transformada['DescribeProyecto']+data_proyecto_transformada['empleos_alternativos']+' '+data_proyecto_transformada['SeleccionaCarrera']).replace('~',','))
 
 
   cluster = 0
