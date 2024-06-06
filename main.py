@@ -276,6 +276,8 @@ class Vectorizer:
         if isinstance(preprocessed_text, str):
             preprocessed_text = [preprocessed_text]
 
+        print(preprocessed_text)
+
         vector = self.vectorizer.transform(preprocessed_text)
         reduced_vector = self.svd.transform(vector)
         return reduced_vector
