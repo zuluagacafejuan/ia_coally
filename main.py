@@ -1,4 +1,5 @@
 import nltk
+from langdetect import detect
 import time
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -241,7 +242,11 @@ class Preprocessor:
         Returns:
             str: Processed text.
         """
-        text_traducido = self.translate(text)
+        if detect(text) != "es":
+          text_traducido = self.translate(text)
+        else:
+           text_traducido = text
+           
         try:
             resumen = self.textSummarizer(text_traducido, 0.25)
         except:
