@@ -966,6 +966,9 @@ def agregar_proyecto(id_proyecto, uniandes=False):
     else:
       relacion_experiencia = features['experiencia']/features_proyecto['experiencia']
 
+    if id_proyecto == '66327a208fb39e0019dd9dc6' and id == '62e3673f9d31790018baf62e':
+       print(similitud)
+
 
     features_finales = [relacion_experiencia]+list(calcular_features(features, features_proyecto)) + [similitud]
 
