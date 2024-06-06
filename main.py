@@ -882,15 +882,11 @@ def agregar_cv(id_cv, uniandes=False):
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
   cluster, vector = clusterizar((data_cv_transformada['extracto']+' '+data_cv_transformada['Titulos']).replace('~',','))
-  if id_cv == '64e6c6bcf23933aebd1960a2':
-    cluster = 3
   cluster = 0
   features_cv['cluster'] = cluster
 
   for index, item in enumerate(vector):
     features_cv['x'+str(index+1)] = item
-
-  
 
   insertar_features_cv(features_cv, uniandes)
   mejores_oportunidades_similitud = obtener_mejores_oportunidades_similitud(cluster, [vector], uniandes)
@@ -916,6 +912,7 @@ def agregar_cv(id_cv, uniandes=False):
 
     X_scaled = scaler.transform(X)
     # compatibilidad = modelo.predict_proba(X_scaled)[0]*min(similitud/0.6, 1)
+    print('llego')
     compatibilidad = max(0, min(similitud*1.5, 1))
 
     actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id, uniandes)
