@@ -884,7 +884,6 @@ def agregar_cv(id_cv, uniandes=False):
   
   print('llego1')
   cluster, vector = clusterizar((data_cv_transformada['extracto']+' '+data_cv_transformada['Titulos']).replace('~',','))
-  print('llego2')
   cluster = 0
   features_cv['cluster'] = cluster
 
@@ -1059,7 +1058,8 @@ def create_cv(request: CreateCVRequestModel):
 
     try:
       agregar_cv(id_cv, uniandes)
-    except:
+    except Exception as e:
+      print(e)
       agregar_cv(id_cv, not uniandes)
   except:
     return
