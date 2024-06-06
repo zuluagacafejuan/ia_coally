@@ -217,7 +217,7 @@ class Preprocessor:
         Returns:
             str: Sentence with added context.
         """
-        frase = self.remove_accents_and_preserve_n(frase)
+        frase = self.remove_accents_and_preserve_n(sentence)
         
         # Crear una lista para almacenar las palabras reemplazadas
         frase_con_contexto = []
