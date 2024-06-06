@@ -881,14 +881,16 @@ def agregar_cv(id_cv, uniandes=False):
   data_cv = descargar_data_cv(id_cv, uniandes)
   data_cv_transformada = transformar_data_cv(data_cv)
   features_cv = extraer_features_cv(data_cv_transformada)
+  
+  print('llego1')
   cluster, vector = clusterizar((data_cv_transformada['extracto']+' '+data_cv_transformada['Titulos']).replace('~',','))
+  print('llego2')
   cluster = 0
   features_cv['cluster'] = cluster
 
   for index, item in enumerate(vector):
     features_cv['x'+str(index+1)] = item
 
-  print('llego1')
 
   insertar_features_cv(features_cv, uniandes)
   mejores_oportunidades_similitud = obtener_mejores_oportunidades_similitud(cluster, [vector], uniandes)
