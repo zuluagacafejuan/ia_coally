@@ -217,10 +217,19 @@ class Preprocessor:
         Returns:
             str: Sentence with added context.
         """
-        sentence = self.remove_accents_and_preserve_n(sentence)
-        words = sentence.split()
-        sentence_with_context = [self.context[word.lower()] if word.lower() in self.context else word for word in words]
-        return ' '.join(sentence_with_context)
+        frase = self.remove_accents_and_preserve_n(frase)
+        
+        # Crear una lista para almacenar las palabras reemplazadas
+        frase_con_contexto = []
+        
+        # Iterar sobre todas las palabras clave del contexto
+        for palabra_clave, descripcion in self.context.items():
+            # Utilizar una expresión regular para buscar la palabra clave en la frase
+            palabra_clave_regex = re.compile(r'\b{}\b'.format(re.escape(palabra_clave)), re.IGNORECASE)
+            # Reemplazar la palabra clave por su descripción en la frase
+            frase = palabra_clave_regex.sub(descripcion, frase)
+        
+        return frase
 
     def transform(self, text: str) -> str:
         """
