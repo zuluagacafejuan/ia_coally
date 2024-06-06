@@ -941,7 +941,7 @@ def agregar_proyecto(id_proyecto, uniandes=False):
   toc = time()
 
   print('extraer_features', toc-tic)
-  cluster, vector = clusterizar((data_proyecto_transformada['NombreOportunidad']+' '+data_proyecto_transformada['DescribeProyecto']+data_proyecto_transformada['empleos_alternativos']+' '+data_proyecto_transformada['SeleccionaCarrera']).replace('~',','))
+  cluster, vector = clusterizar((data_proyecto_transformada['NombreOportunidad']+' '+data_proyecto_transformada['DescribeProyecto']).replace('~',','))
 
 
   cluster = 0
