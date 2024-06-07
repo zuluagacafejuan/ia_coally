@@ -240,12 +240,15 @@ class Preprocessor:
         else:
            text_traducido = text
 
+
         try:
             resumen = self.textSummarizer(text_traducido, 0.25)
         except:
             resumen = text_traducido
 
         text = resumen if len(resumen.split()) > 10 else text
+
+        print('texto', text)
         text = self.add_context(text)
         trigrams_list = self.extract_trigrams(text)
         processed_text = self.remove_stopwords(trigrams_list)
