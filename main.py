@@ -880,6 +880,7 @@ def calcular_features(features_cv, features_proyecto):
 def calcular_porcentaje_similitud(features):
   modelo.predict_proba(features)
 
+import random
 def agregar_cv(id_cv, uniandes=False):
   data_cv = descargar_data_cv(id_cv, uniandes)
   data_cv_transformada = transformar_data_cv(data_cv)
@@ -921,11 +922,16 @@ def agregar_cv(id_cv, uniandes=False):
     similitud_escalada = similitud*1.5 if similitud > 0.35 else similitud*1.1
     compatibilidad = max(0, min(similitud_escalada, 1))
 
+    if compatibilidad == 1:
+       compatibilidad -= (random.random()*0.15)
+
     actualizar_compatibilidad(connection, cursor, compatibilidad, id_cv, id, uniandes)
    
   connection.close()
   cursor.close()
   return 200
+
+
 
 from time import time
 
