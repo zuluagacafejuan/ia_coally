@@ -250,6 +250,8 @@ class Preprocessor:
 
         print('texto', text)
         text = self.add_context(text)
+
+        print('con contexto', text)
         trigrams_list = self.extract_trigrams(text)
         processed_text = self.remove_stopwords(trigrams_list)
         return self.lemmatize(processed_text)
