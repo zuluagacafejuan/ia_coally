@@ -1089,5 +1089,6 @@ def add_applicant(request: AddApplicantRequestModel):
     uniandes = request.uniandes
 
     agregar_aplicante(id_project, id_cv, uniandes)
-  except:
+  except Exception as e:
+    print(e)
     return
