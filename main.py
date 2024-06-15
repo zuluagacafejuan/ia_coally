@@ -1007,7 +1007,7 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
   cv_df = pd.DataFrame({k:[v] for k,v in features_cv.items()})
   oportunidad_df = pd.DataFrame({k:[v] for k,v in features_proyecto.items()})
 
-  similitud = cosine_similarity(cv_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1), oportunidad_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))
+  similitud = cosine_similarity(cv_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1), oportunidad_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))[0][0]
 
   # compatibilidad = max(modelo.predict_proba(X_scaled)[0]*min(similitud[0][0]/0.6, 1),0)
   similitud_escalada = similitud*1.5 if similitud > 0.35 else similitud*1.1
