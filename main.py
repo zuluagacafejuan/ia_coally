@@ -1078,9 +1078,11 @@ def create_project(request: CreateProjectRequestModel):
 
     try:
       agregar_proyecto(id_project, uniandes)
-    except:
+    except Exception as e:
+      print(e)
       agregar_proyecto(id_project, not uniandes)
-  except:
+  except Exception as e:
+    print(e)
     return
 
 @app.post("/api/add_applicant")
