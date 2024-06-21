@@ -539,7 +539,7 @@ def obtener_vectores_oportunidades_id(id, uniandes=False):
 
   columnas = [desc[0] for desc in cursor.description]
   df_resultados = pd.DataFrame(resultados, columns=columnas)
-  return df_resultados.drop(['cluster', 'approved_by', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1)
+  return df_resultados.drop(['cluster', 'approved_by', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera', 'tipo_oferta'], axis = 1)
 
 ################################################################################################
 ##################################### OBTENER VECTORES CV ######################################
@@ -828,7 +828,7 @@ def obtener_mejores_oportunidades_similitud(cluster, vector_cv, uniandes=False):
   vectores_oportunidades_cluster = obtener_vectores_oportunidades_cluster(cluster, uniandes)
   if len(vectores_oportunidades_cluster) == 0:
     return {}
-  similitud_cos = cosine_similarity(vector_cv, vectores_oportunidades_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera', 'approved_by'], axis = 1))
+  similitud_cos = cosine_similarity(vector_cv, vectores_oportunidades_cluster.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera', 'approved_by', 'tipo_oferta'], axis = 1))
   indices = np.where(similitud_cos[0] > 0.35)[0]
   return dict(zip(vectores_oportunidades_cluster.iloc[indices]['id'], similitud_cos[0][indices]))
 
@@ -941,6 +941,12 @@ def agregar_proyecto(id_proyecto, uniandes=False):
 
   approved_by = "-".join(data_proyecto['approvedBy']) if 'approvedBy' in data_proyecto else 'coally'
 
+  tipos = ['Todas']
+
+  tipos.append(data_proyecto['tipoDeServicioDeseado']) if 'tipoDeServicioDeseado' in data_proyecto else None
+
+  tipo_oferta = "-".join(tipos) 
+
   data_proyecto_transformada = transformar_data_proyecto(data_proyecto)
 
   features_proyecto = extraer_features_proyecto(data_proyecto_transformada)
@@ -951,6 +957,7 @@ def agregar_proyecto(id_proyecto, uniandes=False):
   cluster = 0
   features_proyecto['cluster'] = cluster
   features_proyecto['approved_by'] = approved_by
+  features_proyecto['tipo_oferta'] = tipo_oferta
   for index, item in enumerate(vector):
     features_proyecto['x'+str(index+1)] = item
   insertar_features_proyectos(features_proyecto, uniandes)
@@ -1009,7 +1016,7 @@ def agregar_aplicante(id_job, id_cv, uniandes = False):
   cv_df = pd.DataFrame({k:[v] for k,v in features_cv.items()})
   oportunidad_df = pd.DataFrame({k:[v] for k,v in features_proyecto.items()})
 
-  similitud = cosine_similarity(cv_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1), oportunidad_df.drop(['cluster', 'approved_by', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))[0][0]
+  similitud = cosine_similarity(cv_df.drop(['cluster', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1), oportunidad_df.drop(['cluster', 'tipo_oferta', 'approved_by', 'id', 'experiencia', 'softskills', 'hardskills', 'carrera'], axis = 1))[0][0]
 
   # compatibilidad = max(modelo.predict_proba(X_scaled)[0]*min(similitud[0][0]/0.6, 1),0)
   similitud_escalada = similitud*1.5 if similitud > 0.35 else similitud*1.1
