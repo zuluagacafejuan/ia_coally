@@ -306,7 +306,7 @@ nltk.download('wordnet')
 #########################################################
 #################### FUNCIONES ÚTILES ###################
 #########################################################
-
+print(os.environ.get('MONGO_COALLY'))
 client = MongoClient(os.environ.get('MONGO_COALLY'))
 
 db = client['CoallyProd']
