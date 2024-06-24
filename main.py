@@ -42,6 +42,9 @@ import nltk
 from nltk.stem import SnowballStemmer
 from nltk.tokenize import word_tokenize
 
+os.environ['MONGO_COALLY'] = "mongodb+srv://danielCTO:S3cure-2024Co4llyn3w@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true"
+os.environ['MONGO_UNIANDES'] = "mongodb+srv://danielCTO:S3cure-2024Co4llyn3w@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster"
+
 
 class Preprocessor:
     def __init__(self):
