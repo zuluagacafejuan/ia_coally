@@ -307,7 +307,7 @@ nltk.download('wordnet')
 #################### FUNCIONES ÚTILES ###################
 #########################################################
 
-client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
+client = MongoClient("mongodb+srv://danielCTO:S3cure-2024Co4llyn3w@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
 
 db = client['CoallyProd']
 db_proyectos = db['projects']
@@ -695,10 +695,10 @@ def extraer_hard_skills(texto):
 
 def descargar_data_cv(id_cv, uniandes =False):
   if uniandes:
-    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster") 
+    client = MongoClient("mongodb+srv://danielCTO:S3cure-2024Co4llyn3w@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster") 
     db = client['development']
   else:
-    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
+    client = MongoClient("mongodb+srv://danielCTO:S3cure-2024Co4llyn3w@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
     db = client['CoallyProd']
 
   db_cvs = db['usercvs']
@@ -718,10 +718,10 @@ def descargar_data_cv(id_cv, uniandes =False):
 def descargar_data_proyecto(id_proyecto, uniandes=False):
 
   if uniandes:
-    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster")
+    client = MongoClient("mongodb+srv://danielCTO:S3cure-2024Co4llyn3w@uniandescluster.h6u8ndo.mongodb.net/?retryWrites=true&w=majority&appName=UniandesCluster")
     db = client['development']
   else:
-    client = MongoClient("mongodb+srv://danielCTO:Coally2023-123@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
+    client = MongoClient("mongodb+srv://danielCTO:S3cure-2024Co4llyn3w@coally.nqokc.mongodb.net/CoallyProd?authSource=admin&replicaSet=atlas-39r1if-shard-0&w=majority&readPreference=primary&retryWrites=true&ssl=true")
     db = client['CoallyProd']
   
   db_proyectos = db['projects']
