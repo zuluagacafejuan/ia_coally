@@ -306,8 +306,8 @@ nltk.download('wordnet')
 #########################################################
 #################### FUNCIONES ÚTILES ###################
 #########################################################
-print(os.environ.get('MONGO_COALLY'))
-client = MongoClient(os.environ.get('MONGO_COALLY'))
+print(os.environ.get['MONGO_COALLY'])
+client = MongoClient(os.environ.get['MONGO_COALLY'])
 
 db = client['CoallyProd']
 db_proyectos = db['projects']
@@ -695,10 +695,10 @@ def extraer_hard_skills(texto):
 
 def descargar_data_cv(id_cv, uniandes =False):
   if uniandes:
-    client = MongoClient(os.environ.get('MONGO_UNIANDES')) 
+    client = MongoClient(os.environ.get['MONGO_UNIANDES']) 
     db = client['development']
   else:
-    client = MongoClient(os.environ.get('MONGO_COALLY'))
+    client = MongoClient(os.environ.get['MONGO_COALLY'])
     db = client['CoallyProd']
 
   db_cvs = db['usercvs']
@@ -718,10 +718,10 @@ def descargar_data_cv(id_cv, uniandes =False):
 def descargar_data_proyecto(id_proyecto, uniandes=False):
 
   if uniandes:
-    client = MongoClient(os.environ.get('MONGO_UNIANDES'))
+    client = MongoClient(os.environ.get['MONGO_UNIANDES'])
     db = client['development']
   else:
-    client = MongoClient(os.environ.get('MONGO_COALLY'))
+    client = MongoClient(os.environ.get['MONGO_COALLY'])
     db = client['CoallyProd']
   
   db_proyectos = db['projects']
