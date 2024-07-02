@@ -892,7 +892,7 @@ def agregar_cv(id_cv, uniandes=False):
   print(data_cv_transformada['extracto'])
 
   if 'medico egresado' in data_cv_transformada['extracto'].lower() or 'médico egresado' in data_cv_transformada['extracto'].lower():
-     data_cv_transformada['extracto'] = data_cv_transformada['extracto'].replace('Python','').replace('STATA','').replace('RStudio', '')
+     data_cv_transformada['extracto'] = data_cv_transformada['extracto'].replace('Python','').replace('STATA','').replace('RStudio', '').replace('bases de datos').replace('software','')
   cluster, vector = clusterizar((data_cv_transformada['extracto']).replace('~',','))
   cluster = 0
   features_cv['cluster'] = cluster
