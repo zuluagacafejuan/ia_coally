@@ -886,10 +886,11 @@ def calcular_porcentaje_similitud(features):
 import random
 def agregar_cv(id_cv, uniandes=False):
   data_cv = descargar_data_cv(id_cv, uniandes)
+  print('descargo')
   data_cv_transformada = transformar_data_cv(data_cv)
+  print('transformo')
   features_cv = extraer_features_cv(data_cv_transformada)
-  
-  print(data_cv_transformada['extracto'])
+  print('features')
 
   if 'medico egresado' in data_cv_transformada['extracto'].lower() or 'médico egresado' in data_cv_transformada['extracto'].lower():
      data_cv_transformada['extracto'] = data_cv_transformada['extracto'].replace('Python','').replace('STATA','').replace('RStudio', '').replace('bases de datos','').replace('software','')
