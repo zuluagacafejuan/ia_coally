@@ -730,7 +730,7 @@ def descargar_data_proyecto(id_proyecto, uniandes=False):
   db_proyectos = db['projects']
   data_proyecto = db_proyectos.find_one({'_id':ObjectId(id_proyecto)})
 
-  lista_columnas = ["_id","NombreOportunidad", "DescribeProyecto", "municipio", "responsabilidadYfunciones", "country","habilidadesTecnicas","Niveldeconocimiento","experienciaAnos","habilidadesBlandas","empleos_alternativos","SeleccionaCarrera","departamento", "approvedBy"]
+  lista_columnas = ["_id","NombreOportunidad", "tipoDeServicioDeseado", "DescribeProyecto", "municipio", "responsabilidadYfunciones", "country","habilidadesTecnicas","Niveldeconocimiento","experienciaAnos","habilidadesBlandas","empleos_alternativos","SeleccionaCarrera","departamento", "approvedBy"]
   temp_dict = {}
   for elemento in lista_columnas:
     if elemento in data_proyecto.keys():
