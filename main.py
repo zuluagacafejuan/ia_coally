@@ -746,7 +746,7 @@ def transformar_data_cv(data_cv):
   temp_dict['_id'] = str(data_cv['_id'])
   temp_dict['aptitudes_principales'] = '~ '.join(data_cv['aptitudes_principales']) if data_cv['aptitudes_principales'] != None else ''
   temp_dict['Titulos'] = (lambda x: ', '.join([i['Titulo_Certificacion'] for i in x if x is not None]))(data_cv['educacion']) if data_cv['educacion'] is not None else ''
-  temp_dict['Instituciones'] = (lambda x: ', '.join([i['NombreInstitucion'] for i in x]))(data_cv['educacion']) if data_cv['educacion'] is not None else ''
+  temp_dict['Instituciones'] = (lambda x: ', '.join([i['NombreInstitucion'] for i in x if 'NombreInstitucion' in i]))(data_cv['educacion']) if data_cv['educacion'] is not None else ''
   temp_dict['cargos'] = (lambda x: '~ '.join([cargo['nombrecargo'] for experiencia in x for cargo in experiencia.get('cargos', []) if x is not None and experiencia.get('cargos') is not None and cargo['nombrecargo'] != '-']))(data_cv.get('experiencia', [])) if data_cv.get('experiencia') is not None else ''
   temp_dict['experiencia'] = (lambda x: sum([experiencia['totalDuracion'] for experiencia in x if 'totalDuracion' in experiencia.keys() and type(experiencia['totalDuracion']) != str]))(data_cv['experiencia']) if data_cv['experiencia'] != None else 0
   for k,v in data_cv.items():
@@ -886,11 +886,8 @@ def calcular_porcentaje_similitud(features):
 import random
 def agregar_cv(id_cv, uniandes=False):
   data_cv = descargar_data_cv(id_cv, uniandes)
-  print('descargo')
   data_cv_transformada = transformar_data_cv(data_cv)
-  print('transformo')
   features_cv = extraer_features_cv(data_cv_transformada)
-  print('features')
 
   if 'medico egresado' in data_cv_transformada['extracto'].lower() or 'médico egresado' in data_cv_transformada['extracto'].lower():
      data_cv_transformada['extracto'] = data_cv_transformada['extracto'].replace('Python','').replace('STATA','').replace('RStudio', '').replace('bases de datos','').replace('software','')
