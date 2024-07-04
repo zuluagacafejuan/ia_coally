@@ -947,6 +947,8 @@ def agregar_proyecto(id_proyecto, uniandes=False):
 
   tipos = ['Todas']
 
+  print(data_proyecto)
+
   tipos.append(data_proyecto['tipoDeServicioDeseado']) if 'tipoDeServicioDeseado' in data_proyecto else None
 
   tipo_oferta = "-".join(tipos) 
